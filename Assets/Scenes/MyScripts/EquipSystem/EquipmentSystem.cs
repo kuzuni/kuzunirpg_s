@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
+using System.Collections;
 
 public class EquipmentSystem : MonoBehaviour
 {
@@ -37,8 +38,7 @@ public class EquipmentSystem : MonoBehaviour
                 {
                     var eq = slot.CurrentEquipment;
                     var rarityColor = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(eq.rarity));
-                    var rarityName = RarityColors.GetRarityName(eq.rarity);
-                    info.Add($"<color=#{rarityColor}>[{rarityName}] {eq.equipmentName}</color>");
+                    info.Add($"<color=#{rarityColor}>[{eq.GetFullRarityName()}] {eq.equipmentName}</color>");
                 }
             }
             return info;
@@ -47,11 +47,41 @@ public class EquipmentSystem : MonoBehaviour
 
     // 참조
     private PlayerStatus playerStatus;
+    private InventorySystem inventorySystem;
     private bool isInitialized = false;
 
     // 이벤트
     public event Action<EquipmentData, EquipmentType> OnEquipmentChanged;
     public event Action<EquipmentType> OnEquipmentRemoved;
+
+    void Awake()
+    {
+        // 인벤토리 시스템 찾기
+        inventorySystem = GetComponent<InventorySystem>();
+        if (inventorySystem == null)
+        {
+            inventorySystem = FindObjectOfType<InventorySystem>();
+        }
+
+        // 잠시 대기 후 설정 (인벤토리가 먼저 초기화되도록)
+        StartCoroutine(SetupReferences());
+    }
+
+    IEnumerator SetupReferences()
+    {
+        yield return null; // 한 프레임 대기
+
+        if (inventorySystem != null)
+        {
+            EquipmentSlot.SetInventoryReference(inventorySystem);
+            EquipmentSlot.SetEquipmentSystemReference(this);
+            Debug.Log("EquipmentSlot 참조 설정 완료");
+        }
+        else
+        {
+            Debug.LogError("InventorySystem을 찾을 수 없습니다!");
+        }
+    }
 
     public void Initialize(PlayerStatus status)
     {
@@ -68,6 +98,44 @@ public class EquipmentSystem : MonoBehaviour
             { EquipmentType.Armor, new EquipmentSlot(EquipmentType.Armor) },
             { EquipmentType.Ring, new EquipmentSlot(EquipmentType.Ring) }
         };
+    }
+
+    // Inspector에서 슬롯 변경 시 처리하는 메서드
+    public void HandleSlotChange(EquipmentType slotType, EquipmentData newEquipment)
+    {
+        if (!isInitialized || inventorySystem == null)
+        {
+            Debug.LogWarning("시스템이 초기화되지 않았거나 인벤토리가 없습니다.");
+            return;
+        }
+
+        var slot = equipmentSlots[slotType];
+        var previousEquipment = slot.CurrentEquipment;
+
+        // 이전 장비가 있었다면 인벤토리로 반환
+        if (previousEquipment != null && previousEquipment != newEquipment)
+        {
+            ApplyEquipmentStats(previousEquipment, false);
+            inventorySystem.AddItem(previousEquipment);
+        }
+
+        // 새 장비 장착
+        if (newEquipment != null)
+        {
+            ApplyEquipmentStats(newEquipment, true);
+            inventorySystem.RemoveItem(newEquipment, 1);
+            OnEquipmentChanged?.Invoke(newEquipment, slotType);
+
+            var color = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(newEquipment.rarity));
+            Debug.Log($"<color=#{color}>[{newEquipment.GetFullRarityName()}] {newEquipment.equipmentName}을(를) 장착했습니다!</color>");
+        }
+        else
+        {
+            OnEquipmentRemoved?.Invoke(slotType);
+            Debug.Log($"{slotType} 슬롯을 비웠습니다.");
+        }
+
+        UpdateTotalBonuses();
     }
 
     [Title("장비 관리")]
@@ -95,7 +163,6 @@ public class EquipmentSystem : MonoBehaviour
             OnEquipmentChanged?.Invoke(equipment, equipment.equipmentType);
             UpdateTotalBonuses();
 
-            // 등급별 색상으로 로그 출력
             var color = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(equipment.rarity));
             Debug.Log($"<color=#{color}>[{equipment.GetFullRarityName()}] {equipment.equipmentName}을(를) 장착했습니다!</color>");
             return true;
@@ -123,6 +190,69 @@ public class EquipmentSystem : MonoBehaviour
             UpdateTotalBonuses();
 
             Debug.Log($"<color=yellow>{unequipped.equipmentName}을(를) 해제했습니다!</color>");
+        }
+
+        return unequipped;
+    }
+
+    // 장비 장착 시 인벤토리에서 제거하는 메서드
+    public bool EquipItemFromInventory(EquipmentData equipment)
+    {
+        if (!isInitialized || equipment == null || inventorySystem == null)
+        {
+            Debug.LogError("시스템이 초기화되지 않았거나 장비/인벤토리가 null입니다.");
+            return false;
+        }
+
+        var slot = equipmentSlots[equipment.equipmentType];
+
+        // 이미 장착된 장비가 있으면 인벤토리로 반환
+        if (!slot.IsEmpty)
+        {
+            var unequipped = slot.CurrentEquipment;
+            inventorySystem.AddItem(unequipped);
+        }
+
+        // 새 장비 장착
+        if (slot.Equip(equipment))
+        {
+            ApplyEquipmentStats(equipment, true);
+            OnEquipmentChanged?.Invoke(equipment, equipment.equipmentType);
+            UpdateTotalBonuses();
+
+            // 인벤토리에서 제거
+            inventorySystem.RemoveItem(equipment, 1);
+
+            var color = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(equipment.rarity));
+            Debug.Log($"<color=#{color}>[{equipment.GetFullRarityName()}] {equipment.equipmentName}을(를) 장착했습니다!</color>");
+            return true;
+        }
+
+        return false;
+    }
+
+    // 장비 해제 시 인벤토리로 반환하는 메서드
+    public EquipmentData UnequipItemToInventory(EquipmentType slotType)
+    {
+        if (!isInitialized || inventorySystem == null)
+        {
+            Debug.LogError("시스템이 초기화되지 않았거나 인벤토리가 null입니다.");
+            return null;
+        }
+
+        var slot = equipmentSlots[slotType];
+        var unequipped = slot.Unequip();
+
+        if (unequipped != null)
+        {
+            ApplyEquipmentStats(unequipped, false);
+            OnEquipmentRemoved?.Invoke(slotType);
+            UpdateTotalBonuses();
+
+            // 인벤토리로 반환
+            inventorySystem.AddItem(unequipped);
+
+            Debug.Log($"<color=yellow>{unequipped.equipmentName}을(를) 해제하고 인벤토리로 반환했습니다!</color>");
         }
 
         return unequipped;
