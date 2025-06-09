@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca53c47e75de84e4986eb7543b646159, type: 3}
+  m_Name: Ring 2
+  m_EditorClassIdentifier: 
+  equipmentName: "\uBC18\uC9C0"
+  rarity: 3
+  subGrade: 3
+  equipmentType: 2
+  icon: {fileID: 0}
+  attackPowerBonus: 7
+  maxHpBonus: 175
+  hpRegenBonus: 3.5
+  description: 
+  buyPrice: 3500
+  sellPrice: 1750

@@ -1,11 +1,7 @@
-// ===== EquipmentType.cs =====
-using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
-// ===== EquipmentSystem.cs =====
-
+using Sirenix.OdinInspector;
 
 public class EquipmentSystem : MonoBehaviour
 {
@@ -16,16 +12,38 @@ public class EquipmentSystem : MonoBehaviour
 
     [Title("장비 효과")]
     [ShowInInspector, ReadOnly]
-    [ProgressBar(0, 100, 0.8f, 0.3f, 0.3f)]
+    [ProgressBar(0, 200, 0.8f, 0.3f, 0.3f)]
     private int TotalAttackBonus { get; set; }
 
     [ShowInInspector, ReadOnly]
-    [ProgressBar(0, 500, 0.3f, 0.8f, 0.3f)]
+    [ProgressBar(0, 1000, 0.3f, 0.8f, 0.3f)]
     private int TotalMaxHpBonus { get; set; }
 
     [ShowInInspector, ReadOnly]
-    [ProgressBar(0, 10, 0.3f, 0.8f, 0.8f)]
+    [ProgressBar(0, 20, 0.3f, 0.8f, 0.8f)]
     private float TotalHpRegenBonus { get; set; }
+
+    [Title("장착 장비 상세")]
+    [ShowInInspector, ReadOnly]
+    [ListDrawerSettings(ShowFoldout = false, Expanded = true)]
+    private List<string> EquippedItemsInfo
+    {
+        get
+        {
+            var info = new List<string>();
+            foreach (var slot in equipmentSlots.Values)
+            {
+                if (!slot.IsEmpty)
+                {
+                    var eq = slot.CurrentEquipment;
+                    var rarityColor = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(eq.rarity));
+                    var rarityName = RarityColors.GetRarityName(eq.rarity);
+                    info.Add($"<color=#{rarityColor}>[{rarityName}] {eq.equipmentName}</color>");
+                }
+            }
+            return info;
+        }
+    }
 
     // 참조
     private PlayerStatus playerStatus;
@@ -77,7 +95,9 @@ public class EquipmentSystem : MonoBehaviour
             OnEquipmentChanged?.Invoke(equipment, equipment.equipmentType);
             UpdateTotalBonuses();
 
-            Debug.Log($"<color=green>{equipment.equipmentName}을(를) 장착했습니다!</color>");
+            // 등급별 색상으로 로그 출력
+            var color = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(equipment.rarity));
+            Debug.Log($"<color=#{color}>[{equipment.GetFullRarityName()}] {equipment.equipmentName}을(를) 장착했습니다!</color>");
             return true;
         }
 
@@ -112,22 +132,24 @@ public class EquipmentSystem : MonoBehaviour
     {
         int multiplier = isEquipping ? 1 : -1;
 
+        // 등급 보너스가 적용된 최종 스탯 사용
         switch (equipment.equipmentType)
         {
             case EquipmentType.Weapon:
-                playerStatus.AttackPower += equipment.attackPowerBonus * multiplier;
+                playerStatus.AttackPower += equipment.GetFinalAttackPower() * multiplier;
                 break;
 
             case EquipmentType.Armor:
-                playerStatus.MaxHp += equipment.maxHpBonus * multiplier;
+                int hpBonus = equipment.GetFinalMaxHp() * multiplier;
+                playerStatus.MaxHp += hpBonus;
                 if (isEquipping)
                 {
-                    playerStatus.CurrentHp += equipment.maxHpBonus; // 장착 시 현재 체력도 증가
+                    playerStatus.CurrentHp += hpBonus; // 장착 시 현재 체력도 증가
                 }
                 break;
 
             case EquipmentType.Ring:
-                playerStatus.HpRegen += equipment.hpRegenBonus * multiplier;
+                playerStatus.HpRegen += equipment.GetFinalHpRegen() * multiplier;
                 break;
         }
     }
@@ -146,13 +168,13 @@ public class EquipmentSystem : MonoBehaviour
                 switch (equipment.equipmentType)
                 {
                     case EquipmentType.Weapon:
-                        TotalAttackBonus += equipment.attackPowerBonus;
+                        TotalAttackBonus += equipment.GetFinalAttackPower();
                         break;
                     case EquipmentType.Armor:
-                        TotalMaxHpBonus += equipment.maxHpBonus;
+                        TotalMaxHpBonus += equipment.GetFinalMaxHp();
                         break;
                     case EquipmentType.Ring:
-                        TotalHpRegenBonus += equipment.hpRegenBonus;
+                        TotalHpRegenBonus += equipment.GetFinalHpRegen();
                         break;
                 }
             }
@@ -194,28 +216,52 @@ public class EquipmentSystem : MonoBehaviour
             else
             {
                 var eq = slot.CurrentEquipment;
-                Debug.Log($"{kvp.Key}: <color=cyan>{eq.equipmentName}</color>");
+                var color = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(eq.rarity));
+
+                string statInfo = "";
+                switch (eq.equipmentType)
+                {
+                    case EquipmentType.Weapon:
+                        statInfo = $"공격력 +{eq.GetFinalAttackPower()}";
+                        break;
+                    case EquipmentType.Armor:
+                        statInfo = $"최대체력 +{eq.GetFinalMaxHp()}";
+                        break;
+                    case EquipmentType.Ring:
+                        statInfo = $"체력회복 +{eq.GetFinalHpRegen():F1}/초";
+                        break;
+                }
+
+                Debug.Log($"{kvp.Key}: <color=#{color}>[{eq.GetFullRarityName()}] {eq.equipmentName}</color> ({statInfo})");
             }
         }
         Debug.Log($"총 공격력 보너스: <color=red>+{TotalAttackBonus}</color>");
         Debug.Log($"총 최대체력 보너스: <color=green>+{TotalMaxHpBonus}</color>");
-        Debug.Log($"총 체력회복 보너스: <color=cyan>+{TotalHpRegenBonus}/초</color>");
+        Debug.Log($"총 체력회복 보너스: <color=cyan>+{TotalHpRegenBonus:F1}/초</color>");
         Debug.Log("================================");
     }
-}
 
-// ===== PlayerManager.cs 수정 =====
-// PlayerManager의 Awake 메서드에 추가:
-/*
-private EquipmentSystem equipmentSystem;
-public EquipmentSystem Equipment => equipmentSystem;
+    [Title("등급별 통계")]
+    [ShowInInspector, ReadOnly]
+    private Dictionary<EquipmentRarity, int> RarityCount
+    {
+        get
+        {
+            var count = new Dictionary<EquipmentRarity, int>();
+            foreach (EquipmentRarity rarity in Enum.GetValues(typeof(EquipmentRarity)))
+            {
+                count[rarity] = 0;
+            }
 
-void Awake()
-{
-    // 기존 코드...
-    
-    // 장비 시스템 추가
-    equipmentSystem = gameObject.AddComponent<EquipmentSystem>();
-    equipmentSystem.Initialize(playerStatus);
+            foreach (var slot in equipmentSlots.Values)
+            {
+                if (!slot.IsEmpty)
+                {
+                    count[slot.CurrentEquipment.rarity]++;
+                }
+            }
+
+            return count;
+        }
+    }
 }
-*/
