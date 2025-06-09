@@ -9,6 +9,8 @@ public class RelicInstance
     [HorizontalGroup("RelicInfo", 0.15f)]
     [VerticalGroup("RelicInfo/Icon")]
     [PreviewField(60), HideLabel]
+
+    [ShowInInspector]
     public Sprite Icon => relicData?.icon;
 
     [VerticalGroup("RelicInfo/Details")]

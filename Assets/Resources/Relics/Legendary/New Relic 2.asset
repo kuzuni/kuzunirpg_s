@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1259278a54cf6cf459503c82cfb96a2a, type: 3}
   m_Name: New Relic 2
   m_EditorClassIdentifier: 
-  relicName: 
-  rarity: 1
+  relicName: "\uC720\uBB3C"
+  rarity: 3
   relicType: 2
   icon: {fileID: 0}
   statBonuses:

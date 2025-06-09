@@ -401,7 +401,7 @@ MonoBehaviour:
   inventory: []
   showFusionAnimation: 1
   targetIndex: 0
-  materialIndex: 1
+  materialIndex: 0
 --- !u!1 &1719001832
 GameObject:
   m_ObjectHideFlags: 0
@@ -520,6 +520,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1753729774}
   - component: {fileID: 1753729775}
+  - component: {fileID: 1753729776}
   m_Layer: 0
   m_Name: Gacha
   m_TagString: Untagged
@@ -578,6 +579,26 @@ MonoBehaviour:
   enable11PullGuarantee: 1
   enable55PullGuarantee: 1
   inventorySystem: {fileID: 0}
+  autoAddToInventory: 1
+--- !u!114 &1753729776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1753729772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2338a9841591e14686095645d578be4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gachaRates: []
+  pityCount: 90
+  currentPityCount: 0
+  guaranteedRarity: 0
+  recentPullHistory: []
+  enable10PullGuarantee: 1
+  relicInventory: {fileID: 0}
   autoAddToInventory: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

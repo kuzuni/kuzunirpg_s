@@ -10,6 +10,7 @@ public class InventorySlot<T> where T : class
     [VerticalGroup("Slot/Icon")]
     [PreviewField(50), HideLabel]
     [ShowIf("@GetIcon() != null")]
+    [ShowInInspector]
     public Sprite Icon => GetIcon();
 
     [VerticalGroup("Slot/Info")]
