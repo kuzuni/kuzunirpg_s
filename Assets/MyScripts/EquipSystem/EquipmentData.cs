@@ -1,11 +1,8 @@
-﻿
-
-// ===== EquipmentData.cs (세부 등급 추가 버전) =====
-using UnityEngine;
+﻿using UnityEngine;
 using Sirenix.OdinInspector;
 
 [CreateAssetMenu(fileName = "New Equipment", menuName = "RPG/Equipment")]
-public class EquipmentData : ScriptableObject
+public class EquipmentData : ScriptableObject, IGachaItem
 {
     [Title("기본 정보")]
     [HorizontalGroup("BasicInfo", 0.7f)]
@@ -87,6 +84,25 @@ public class EquipmentData : ScriptableObject
     [LabelText("판매 가격")]
     [PropertyRange(0, "@buyPrice / 2")]
     public int sellPrice;
+
+    // IGachaItem 인터페이스 구현
+    public string ItemName => equipmentName;
+    public Sprite Icon => icon;
+
+    public int GetRarityLevel()
+    {
+        return (int)rarity;
+    }
+
+    public string GetRarityName()
+    {
+        return RarityColors.GetRarityName(rarity);
+    }
+
+    public Color GetRarityColor()
+    {
+        return RarityColors.GetRarityColor(rarity);
+    }
 
     // 등급별 최대값 계산
     private int GetMaxStatByRarity()
@@ -185,11 +201,6 @@ public class EquipmentData : ScriptableObject
     }
 
     // Odin Inspector 헬퍼
-    private Color GetRarityColor()
-    {
-        return RarityColors.GetRarityColor(rarity);
-    }
-
     private string GetGradeInfo()
     {
         return $"{GetFullRarityName()} - 총 보너스: +{GetTotalGradeBonus() * 100f:F1}% (기본 {GetRarityBonus() * 100f:F0}% + 세부 {GetSubGradeBonus() * 100f:F1}%)";

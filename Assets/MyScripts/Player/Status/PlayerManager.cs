@@ -10,12 +10,15 @@ public class PlayerManager : MonoBehaviour
     private AttackSystem attackSystem;
     private EnhancementSystem enhancementSystem;
     private EquipmentSystem equipmentSystem;
+    private RelicEffectSystem relicEffectSystem;
 
     public PlayerStatus Status => playerStatus;
     public HealthSystem Health => healthSystem;
     public AttackSystem Attack => attackSystem;
     public EnhancementSystem Enhancement => enhancementSystem;
     public EquipmentSystem Equipment => equipmentSystem;
+    public RelicEffectSystem RelicEffect => relicEffectSystem;
+
     void Awake()
     {
         // 컴포넌트 초기화
@@ -24,7 +27,8 @@ public class PlayerManager : MonoBehaviour
         attackSystem = gameObject.AddComponent<AttackSystem>();
         enhancementSystem = gameObject.AddComponent<EnhancementSystem>();
         equipmentSystem = gameObject.AddComponent<EquipmentSystem>();
-  
+        relicEffectSystem = gameObject.AddComponent<RelicEffectSystem>();
+
         // PlayerStatus 주입
         var statusField = typeof(HealthSystem).GetField("playerStatus",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -44,8 +48,23 @@ public class PlayerManager : MonoBehaviour
 
         // EnhancementSystem은 Initialize 메서드로 초기화
         enhancementSystem.Initialize(playerStatus);
-        // equipmentSystem은 Initialize 메서드로 초기화
+
+        // EquipmentSystem은 Initialize 메서드로 초기화
         equipmentSystem.Initialize(playerStatus);
+
+        // RelicEffectSystem은 필드 주입 후 Initialize
+        statusField = typeof(RelicEffectSystem).GetField("playerStatus",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        statusField.SetValue(relicEffectSystem, playerStatus);
+    }
+
+    void Start()
+    {
+        // RelicEffectSystem은 RelicInventorySystem이 준비된 후 초기화
+        if (relicEffectSystem != null)
+        {
+            relicEffectSystem.Initialize();
+        }
     }
 
     // 디버그 메서드
@@ -75,6 +94,20 @@ public class PlayerManager : MonoBehaviour
             enhancementSystem.DebugEnhancementInfo();
     }
 
+    [ContextMenu("Show Equipment Status")]
+    void ShowEquipmentStatus()
+    {
+        if (equipmentSystem != null)
+            equipmentSystem.DebugEquipmentStatus();
+    }
+
+    [ContextMenu("Show Relic Effects")]
+    void ShowRelicEffects()
+    {
+        if (relicEffectSystem != null)
+            relicEffectSystem.ShowRelicEffectSummary();
+    }
+
     // 키보드 입력으로 디버그 (옵션)
     void Update()
     {
@@ -89,6 +122,20 @@ public class PlayerManager : MonoBehaviour
         {
             if (enhancementSystem != null)
                 enhancementSystem.DebugEnhancementInfo();
+        }
+
+        // F3 키를 누르면 장비 정보 표시
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            if (equipmentSystem != null)
+                equipmentSystem.DebugEquipmentStatus();
+        }
+
+        // F4 키를 누르면 유물 효과 표시
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            if (relicEffectSystem != null)
+                relicEffectSystem.ShowRelicEffectSummary();
         }
     }
 }

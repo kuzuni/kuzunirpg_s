@@ -350,6 +350,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1163819207}
   - component: {fileID: 1163819206}
+  - component: {fileID: 1163819208}
   m_Layer: 0
   m_Name: Inventory
   m_TagString: Untagged
@@ -369,7 +370,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bbf62c302c588845a52773fb733081a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSlots: 100
   inventory: []
 --- !u!4 &1163819207
 Transform:
@@ -386,6 +386,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1163819208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163819205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 859473180f4ffa14684c46b5492ba90e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventory: []
+  showFusionAnimation: 1
+  targetIndex: 0
+  materialIndex: 1
 --- !u!1 &1719001832
 GameObject:
   m_ObjectHideFlags: 0
@@ -541,68 +557,26 @@ MonoBehaviour:
   gachaRates:
   - rarity: 0
     probability: 45
-    subGradeProbabilities:
-    - 40
-    - 30
-    - 20
-    - 7
-    - 3
   - rarity: 1
     probability: 30
-    subGradeProbabilities:
-    - 40
-    - 30
-    - 20
-    - 7
-    - 3
   - rarity: 2
     probability: 17
-    subGradeProbabilities:
-    - 40
-    - 30
-    - 20
-    - 7
-    - 3
   - rarity: 3
     probability: 6
-    subGradeProbabilities:
-    - 40
-    - 30
-    - 20
-    - 7
-    - 3
   - rarity: 4
     probability: 1.5
-    subGradeProbabilities:
-    - 40
-    - 30
-    - 20
-    - 7
-    - 3
   - rarity: 5
     probability: 0.45
-    subGradeProbabilities:
-    - 40
-    - 30
-    - 20
-    - 7
-    - 3
   - rarity: 6
     probability: 0.05
-    subGradeProbabilities:
-    - 40
-    - 30
-    - 20
-    - 7
-    - 3
   pityCount: 90
   currentPityCount: 20
   guaranteedRarity: 3
+  recentPullHistory: []
   softPityStart: 70
   softPityIncrement: 5
   enable11PullGuarantee: 1
   enable55PullGuarantee: 1
-  recentPullHistory: []
   inventorySystem: {fileID: 0}
   autoAddToInventory: 1
 --- !u!1660057539 &9223372036854775807
