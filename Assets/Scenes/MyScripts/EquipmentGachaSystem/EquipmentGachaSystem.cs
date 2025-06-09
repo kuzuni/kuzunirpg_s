@@ -70,6 +70,14 @@ public partial class EquipmentGachaSystem : MonoBehaviour
     [Title("통계")]
     [SerializeField]
     private Dictionary<EquipmentRarity, int> pullStatistics = new Dictionary<EquipmentRarity, int>();
+    [Title("인벤토리 연동")]
+    [SerializeField]
+    private InventorySystem inventorySystem;
+
+    [SerializeField]
+    private bool autoAddToInventory = true;
+
+
 
     void Start()
     {
@@ -87,6 +95,15 @@ public partial class EquipmentGachaSystem : MonoBehaviour
         if (recentPullHistory == null)
         {
             recentPullHistory = new List<string>();
+        }
+        // 인벤토리 시스템 찾기
+        if (inventorySystem == null)
+        {
+            inventorySystem = GetComponent<InventorySystem>();
+            if (inventorySystem == null)
+            {
+                inventorySystem = FindObjectOfType<InventorySystem>();
+            }
         }
     }
 
@@ -379,12 +396,20 @@ public partial class EquipmentGachaSystem : MonoBehaviour
         }
     }
 
+    // ShowSingleResult 메서드 수정
     private void ShowSingleResult(EquipmentData equipment)
     {
         var color = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(equipment.rarity));
         Debug.Log($"<color=#{color}>★ 획득: {equipment.GetFullRarityName()} - {equipment.equipmentName} ★</color>");
+
+        // 인벤토리에 자동 추가
+        if (autoAddToInventory && inventorySystem != null)
+        {
+            inventorySystem.AddItem(equipment);
+        }
     }
 
+    // ShowMultipleResults 메서드 수정
     private void ShowMultipleResults(List<EquipmentData> results, string title)
     {
         Debug.Log($"========== {title} 결과 ==========");
@@ -398,6 +423,16 @@ public partial class EquipmentGachaSystem : MonoBehaviour
         }
 
         Debug.Log("================================");
+
+        // 인벤토리에 자동 추가
+        if (autoAddToInventory && inventorySystem != null)
+        {
+            int addedCount = inventorySystem.AddItems(results);
+            if (addedCount < results.Count)
+            {
+                Debug.LogWarning($"인벤토리 공간 부족! {results.Count}개 중 {addedCount}개만 추가됨");
+            }
+        }
     }
 
     private void ShowPullStatistics(List<EquipmentData> results)
