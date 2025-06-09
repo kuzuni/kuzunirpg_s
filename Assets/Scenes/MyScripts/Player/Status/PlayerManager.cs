@@ -9,12 +9,13 @@ public class PlayerManager : MonoBehaviour
     private HealthRegenerationSystem regenSystem;
     private AttackSystem attackSystem;
     private EnhancementSystem enhancementSystem;
+    private EquipmentSystem equipmentSystem;
 
     public PlayerStatus Status => playerStatus;
     public HealthSystem Health => healthSystem;
     public AttackSystem Attack => attackSystem;
     public EnhancementSystem Enhancement => enhancementSystem;
-
+    public EquipmentSystem Equipment => equipmentSystem;
     void Awake()
     {
         // 컴포넌트 초기화
@@ -22,7 +23,8 @@ public class PlayerManager : MonoBehaviour
         regenSystem = gameObject.AddComponent<HealthRegenerationSystem>();
         attackSystem = gameObject.AddComponent<AttackSystem>();
         enhancementSystem = gameObject.AddComponent<EnhancementSystem>();
-
+        equipmentSystem = gameObject.AddComponent<EquipmentSystem>();
+  
         // PlayerStatus 주입
         var statusField = typeof(HealthSystem).GetField("playerStatus",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -42,6 +44,8 @@ public class PlayerManager : MonoBehaviour
 
         // EnhancementSystem은 Initialize 메서드로 초기화
         enhancementSystem.Initialize(playerStatus);
+        // equipmentSystem은 Initialize 메서드로 초기화
+        equipmentSystem.Initialize(playerStatus);
     }
 
     // 디버그 메서드
