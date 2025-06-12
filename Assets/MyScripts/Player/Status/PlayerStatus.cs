@@ -15,7 +15,7 @@ public enum StatType
 
 [Serializable]
 [InlineProperty]
-public class PlayerStatus
+public partial class PlayerStatus
 {
     [Title("Ã¼·Â (Health)", Bold = true)]
     [HorizontalGroup("Health", 0.5f)]
