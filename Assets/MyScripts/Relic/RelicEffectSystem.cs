@@ -42,7 +42,7 @@ public class RelicEffectSystem : MonoBehaviour
             playerStatus = GetComponent<PlayerStatus>();
             if (playerStatus == null)
             {
-                playerStatus = FindObjectOfType<PlayerManager>()?.Status;
+                playerStatus = FindObjectOfType<PlayerController>()?.Status;
             }
         }
         
