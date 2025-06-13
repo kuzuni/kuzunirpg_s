@@ -1,13 +1,13 @@
-﻿// 강화 타입 정의
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using RPG.Player;
 using RPG.Common;
-namespace RPG.Enhancement 
-{
+using RPG.Core.Events;
 
+namespace RPG.Enhancement
+{
     // 강화 시스템 인터페이스
     public interface IEnhanceable
     {
@@ -32,10 +32,6 @@ namespace RPG.Enhancement
         // 초기화 여부 확인
         [ShowInInspector, ReadOnly]
         private bool isInitialized = false;
-
-        // 이벤트
-        public event Action<StatType, int> OnStatEnhanced;
-        public event Action<StatType> OnEnhancementMaxed;
 
         [Title("Test Controls")]
         [PropertySpace(10)]
@@ -141,14 +137,14 @@ namespace RPG.Enhancement
         {
             // 모든 스탯 타입에 대해 초기화
             enhancementLevels = new List<StatEnhancementLevel>
-        {
-            new StatEnhancementLevel { statType = StatType.MaxHp, baseEnhancementValue = 20f, isPercentage = false, maxLevel = 10 },
-            new StatEnhancementLevel { statType = StatType.AttackPower, baseEnhancementValue = 3f, isPercentage = false, maxLevel = 10 },
-            new StatEnhancementLevel { statType = StatType.CritChance, baseEnhancementValue = 0.02f, isPercentage = false, maxLevel = 5 },
-            new StatEnhancementLevel { statType = StatType.CritDamage, baseEnhancementValue = 0.1f, isPercentage = false, maxLevel = 5 },
-            new StatEnhancementLevel { statType = StatType.AttackSpeed, baseEnhancementValue = 5f, isPercentage = true, maxLevel = 10 },
-            new StatEnhancementLevel { statType = StatType.HpRegen, baseEnhancementValue = 0.5f, isPercentage = false, maxLevel = 10 }
-        };
+            {
+                new StatEnhancementLevel { statType = StatType.MaxHp, baseEnhancementValue = 20f, isPercentage = false, maxLevel = 10 },
+                new StatEnhancementLevel { statType = StatType.AttackPower, baseEnhancementValue = 3f, isPercentage = false, maxLevel = 10 },
+                new StatEnhancementLevel { statType = StatType.CritChance, baseEnhancementValue = 0.02f, isPercentage = false, maxLevel = 5 },
+                new StatEnhancementLevel { statType = StatType.CritDamage, baseEnhancementValue = 0.1f, isPercentage = false, maxLevel = 5 },
+                new StatEnhancementLevel { statType = StatType.AttackSpeed, baseEnhancementValue = 5f, isPercentage = true, maxLevel = 10 },
+                new StatEnhancementLevel { statType = StatType.HpRegen, baseEnhancementValue = 0.5f, isPercentage = false, maxLevel = 10 }
+            };
         }
 
         private void SaveOriginalStats()
@@ -189,11 +185,13 @@ namespace RPG.Enhancement
             enhancementLevel.currentLevel++;
             RecalculateStats();
 
-            OnStatEnhanced?.Invoke(statType, enhancementLevel.currentLevel);
+            // 이벤트 발생 (기존 OnStatEnhanced 대체)
+            GameEventManager.TriggerStatEnhanced(statType, enhancementLevel.currentLevel);
 
             if (enhancementLevel.currentLevel >= enhancementLevel.maxLevel)
             {
-                OnEnhancementMaxed?.Invoke(statType);
+                // 이벤트 발생 (기존 OnEnhancementMaxed 대체)
+                GameEventManager.TriggerStatEnhancementMaxed(statType);
             }
 
             Debug.Log($"{statType} 강화 완료! (Lv.{enhancementLevel.currentLevel})");
@@ -224,6 +222,19 @@ namespace RPG.Enhancement
                     ApplyEnhancement(enhancementData);
                 }
             }
+
+            // 스탯 변경 이벤트 발생
+            NotifyStatChanges();
+        }
+
+        private void NotifyStatChanges()
+        {
+            GameEventManager.TriggerPlayerStatChanged(StatType.MaxHp, playerStatus.MaxHp);
+            GameEventManager.TriggerPlayerStatChanged(StatType.AttackPower, playerStatus.AttackPower);
+            GameEventManager.TriggerPlayerStatChanged(StatType.CritChance, playerStatus.CritChance);
+            GameEventManager.TriggerPlayerStatChanged(StatType.CritDamage, playerStatus.CritDamage);
+            GameEventManager.TriggerPlayerStatChanged(StatType.AttackSpeed, playerStatus.AttackSpeed);
+            GameEventManager.TriggerPlayerStatChanged(StatType.HpRegen, playerStatus.HpRegen);
         }
 
         // 강화 적용

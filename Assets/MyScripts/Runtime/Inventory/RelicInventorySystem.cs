@@ -7,12 +7,10 @@ using RPG.Player;
 using RPG.Inventory.Base;
 using RPG.Items.Relic;
 using RPG.Common;
-
-
+using RPG.Core.Events;
 
 namespace RPG.Inventory
 {
-
     // RelicInstance를 직접 슬롯으로 사용
     public class RelicInventorySystem : BaseInventorySystem<RelicInstance, RelicInstance>
     {
@@ -72,7 +70,7 @@ namespace RPG.Inventory
         [SerializeField]
         private bool showFusionAnimation = true;
 
-        // 유물 전용 이벤트 (BaseInventorySystem의 이벤트와 별개)
+        // 유물 전용 로컬 이벤트 (RelicEffectSystem이 구독)
         public event Action<RelicInstance> OnRelicAdded;
         public event Action<RelicInstance> OnRelicRemoved;
         public event Action<RelicInstance, bool> OnFusionAttempt;
@@ -110,12 +108,23 @@ namespace RPG.Inventory
             return false;
         }
 
+        // BaseInventorySystem의 TriggerGlobalItemEvent 오버라이드
+        protected override void TriggerGlobalItemEvent(RelicInstance item, bool isAdded)
+        {
+            if (item != null && isAdded)
+            {
+                // 전역 이벤트 발생
+                GameEventManager.TriggerRelicObtained(item);
+            }
+        }
+
         // BaseInventorySystem의 AddItem 오버라이드
         public override bool AddItem(RelicInstance item, int quantity = 1)
         {
             bool result = base.AddItem(item, quantity);
             if (result && item != null)
             {
+                // 로컬 이벤트 (RelicEffectSystem이 구독)
                 OnRelicAdded?.Invoke(item);
             }
             return result;
@@ -127,6 +136,7 @@ namespace RPG.Inventory
             bool result = base.RemoveItem(item, quantity);
             if (result && item != null)
             {
+                // 로컬 이벤트
                 OnRelicRemoved?.Invoke(item);
             }
             return result;
@@ -236,13 +246,21 @@ namespace RPG.Inventory
                 {
                     Debug.Log($"<color=yellow>★★★ 축하합니다! {targetRelic.relicData.relicName}이(가) 최대 레벨에 도달했습니다! ★★★</color>");
                 }
+
+                // 유물 레벨업 전역 이벤트
+                GameEventManager.TriggerRelicLevelUp(targetRelic);
             }
             else
             {
                 Debug.Log($"<color=red>합성 실패... (성공률: {successRate:P0})</color>");
             }
 
+            // 로컬 이벤트 (RelicEffectSystem이 구독)
             OnFusionAttempt?.Invoke(targetRelic, success);
+
+            // 전역 이벤트 (업적, 퀘스트 등이 구독)
+            GameEventManager.TriggerRelicFusionAttempt(targetRelic, success);
+
             return success;
         }
 
@@ -275,6 +293,8 @@ namespace RPG.Inventory
                 .ToList();
 
             int fusionCount = 0;
+            int successCount = 0;
+
             foreach (var group in commonRelics)
             {
                 var relicList = group.ToList();
@@ -282,14 +302,15 @@ namespace RPG.Inventory
 
                 for (int i = 1; i < relicList.Count && targetRelic.level < 100; i++)
                 {
+                    fusionCount++;
                     if (TryFuseRelics(targetRelic, relicList[i]))
                     {
-                        fusionCount++;
+                        successCount++;
                     }
                 }
             }
 
-            Debug.Log($"<color=yellow>일반 등급 유물 {fusionCount}회 합성 시도 완료!</color>");
+            Debug.Log($"<color=yellow>일반 등급 유물 {fusionCount}회 합성 시도, {successCount}회 성공!</color>");
         }
 
         [Title("합성 테스트")]
@@ -312,6 +333,12 @@ namespace RPG.Inventory
                 materialIndex < 0 || materialIndex >= inventory.Count)
             {
                 Debug.LogError("유효한 인덱스를 선택해주세요!");
+                return;
+            }
+
+            if (targetIndex == materialIndex)
+            {
+                Debug.LogError("같은 유물을 선택했습니다!");
                 return;
             }
 

@@ -3,10 +3,12 @@ using UnityEngine;
 using System.Linq;
 using System;
 using Sirenix.OdinInspector;
+using RPG.Core.Events;
+using RPG.Items.Equipment;
+using RPG.Items.Relic;
+
 namespace RPG.Inventory.Base
 {
-
-
     // 인벤토리 시스템 베이스 클래스
     public abstract class BaseInventorySystem<T, TSlot> : MonoBehaviour, IInventorySystem<T>
         where T : class
@@ -24,7 +26,7 @@ namespace RPG.Inventory.Base
         [ShowInInspector, ReadOnly]
         public int UniqueItems => inventory.Count;
 
-        // 이벤트
+        // 로컬 이벤트 (UI 업데이트용으로 유지)
         public event Action<T, int> OnItemAdded;
         public event Action<T, int> OnItemRemoved;
 
@@ -56,7 +58,12 @@ namespace RPG.Inventory.Base
                 inventory.Add(CreateNewSlot(item, quantity));
             }
 
+            // 로컬 이벤트 발생 (인벤토리 UI 업데이트용)
             OnItemAdded?.Invoke(item, quantity);
+
+            // GameEventManager로 전파 (아이템 타입에 따라)
+            TriggerGlobalItemEvent(item, true);
+
             LogItemAdded(item, quantity);
             return true;
         }
@@ -82,8 +89,28 @@ namespace RPG.Inventory.Base
                 quantity = currentQuantity; // 실제 제거된 수량
             }
 
+            // 로컬 이벤트 발생
             OnItemRemoved?.Invoke(item, quantity);
+
+            // GameEventManager로 전파 (필요한 경우)
+            TriggerGlobalItemEvent(item, false);
+
             return true;
+        }
+
+        // 전역 이벤트 발생 메서드
+        protected virtual void TriggerGlobalItemEvent(T item, bool isAdded)
+        {
+            // 기본 구현: 아이템 타입 체크
+            if (item is EquipmentData equipment && isAdded)
+            {
+                GameEventManager.TriggerEquipmentObtained(equipment);
+            }
+            else if (item is RelicInstance relic && isAdded)
+            {
+                GameEventManager.TriggerRelicObtained(relic);
+            }
+            // 다른 아이템 타입들은 하위 클래스에서 오버라이드하여 처리
         }
 
         public virtual int AddItems(List<T> items)
@@ -127,6 +154,16 @@ namespace RPG.Inventory.Base
 
         public virtual void ClearInventory()
         {
+            // 모든 아이템 제거 이벤트 발생
+            foreach (var slot in inventory.ToList())
+            {
+                var item = GetItemFromSlot(slot);
+                if (item != null)
+                {
+                    OnItemRemoved?.Invoke(item, GetSlotQuantity(slot));
+                }
+            }
+
             inventory.Clear();
             Debug.Log("인벤토리를 초기화했습니다.");
         }

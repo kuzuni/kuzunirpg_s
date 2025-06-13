@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using Sirenix.OdinInspector;
+using RPG.Core.Events;
 
 
 namespace RPG.Player
@@ -101,8 +102,18 @@ namespace RPG.Player
         public int CurrentHp
         {
             get => currentHp;
-            set => currentHp = Mathf.Clamp(value, 0, maxHp);
+            set
+            {
+                currentHp = Mathf.Clamp(value, 0, maxHp);
+                GameEventManager.TriggerPlayerHealthChanged(currentHp, maxHp);
+
+                if (currentHp <= 0)
+                {
+                    GameEventManager.TriggerPlayerDeath();
+                }
+            }
         }
+
 
         public int AttackPower
         {

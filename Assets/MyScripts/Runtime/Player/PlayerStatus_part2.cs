@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using Sirenix.OdinInspector;
+using RPG.Core.Events;
 // 확장된 플레이어 스테이터스 (기존 PlayerStatus 부분 확장)
 namespace RPG.Player
 {
@@ -42,11 +43,21 @@ namespace RPG.Player
             private set => currentExp = value;
         }
 
-        // 이벤트
-        public event Action<int> OnLevelUp;
-        public event Action<int, int> OnExpChanged;
 
-        // 경험치 관련 메서드
+
+
+        private void LevelUp()
+        {
+            level++;
+            maxHp += 10 + level;
+            currentHp = maxHp;
+            attackPower += 2 + (level / 10);
+
+            // 중앙 이벤트 시스템으로 전파
+            GameEventManager.TriggerPlayerLevelUp(level);
+            Debug.Log($"<color=yellow>레벨 업! Lv.{level}</color>");
+        }
+
         public void AddExperience(int amount)
         {
             if (amount <= 0) return;
@@ -54,35 +65,16 @@ namespace RPG.Player
             totalExp += amount;
             currentExp += amount;
 
-            // 레벨업 체크
+            GameEventManager.TriggerPlayerExpGained(amount);
+
             while (currentExp >= GetMaxExp() && level < 999)
             {
                 currentExp -= GetMaxExp();
                 LevelUp();
             }
-
-            // 최대 레벨인 경우 경험치 초과분 제거
-            if (level >= 999)
-            {
-                currentExp = 0;
-            }
-
-            OnExpChanged?.Invoke(currentExp, GetMaxExp());
         }
 
-        private void LevelUp()
-        {
-            level++;
-
-            // 레벨업 시 스탯 증가
-            maxHp += 10 + level;
-            currentHp = maxHp; // 체력 완전 회복
-            attackPower += 2 + (level / 10);
-
-            OnLevelUp?.Invoke(level);
-            Debug.Log($"<color=yellow>레벨 업! Lv.{level}</color>");
-        }
-
+   
         public int GetMaxExp()
         {
             // 레벨에 따른 필요 경험치 공식
@@ -95,10 +87,7 @@ namespace RPG.Player
             return maxExp > 0 ? (float)currentExp / maxExp : 0f;
         }
 
-        private void OnLevelChanged()
-        {
-            OnLevelUp?.Invoke(level);
-        }
+  
 
         private Color GetExpBarColor(float value)
         {

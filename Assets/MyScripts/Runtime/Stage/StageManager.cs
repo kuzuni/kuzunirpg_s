@@ -2,13 +2,11 @@
 using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
-using RPG.Player;
-using RPG.Managers;
+using RPG.Core.Events;
 using RPG.Common;
 
 namespace RPG.Stage
 {
-
     public class StageManager : MonoBehaviour, IStageManager
     {
         [Title("스테이지 설정")]
@@ -26,20 +24,8 @@ namespace RPG.Stage
         public StageData CurrentStage => stages[currentStageIndex];
         public MonsterInstance CurrentMonster { get; private set; }
 
-        // 이벤트
-        public event Action<StageData> OnStageChanged;
-        public event Action<int> OnMonsterKilled;
-        public event Action<float> OnStageProgress;
-        public event Action OnStageComplete;
-
-        private CurrencyManager currencyManager;
-        private PlayerController playerController;
-
         private void Start()
         {
-            currencyManager = FindObjectOfType<CurrencyManager>();
-            playerController = FindObjectOfType<PlayerController>();
-
             // 테스트용 스테이지 생성
             if (stages.Count == 0)
             {
@@ -56,7 +42,9 @@ namespace RPG.Stage
             monstersKilledInStage = 0;
 
             SpawnNextMonster();
-            OnStageChanged?.Invoke(CurrentStage);
+
+            // 이벤트 발생 (기존 OnStageChanged 대체)
+            GameEventManager.TriggerStageStarted(CurrentStage);
         }
 
         private void SpawnNextMonster()
@@ -65,7 +53,15 @@ namespace RPG.Stage
             {
                 var monsterData = CurrentStage.monsters[currentMonsterIndex];
                 CurrentMonster = new MonsterInstance(monsterData);
+
                 Debug.Log($"몬스터 생성: {CurrentMonster.MonsterName}");
+
+                // 몬스터 스폰 이벤트 발생
+                GameEventManager.TriggerMonsterSpawned(
+                    monsterData,
+                    CurrentMonster.CurrentHp,
+                    CurrentMonster.MaxHp
+                );
             }
         }
 
@@ -74,6 +70,12 @@ namespace RPG.Stage
             if (CurrentMonster == null) return;
 
             CurrentMonster.CurrentHp -= damage;
+
+            // 몬스터 체력 변경 이벤트 발생
+            GameEventManager.TriggerMonsterHealthChanged(
+                CurrentMonster.CurrentHp,
+                CurrentMonster.MaxHp
+            );
 
             if (CurrentMonster.CurrentHp <= 0)
             {
@@ -85,15 +87,23 @@ namespace RPG.Stage
         {
             if (CurrentMonster == null) return;
 
-            // 보상 지급
-            currencyManager?.AddCurrency(CurrencyType.Gold, CurrentMonster.data.goldReward);
-            playerController?.Status.AddExperience(CurrentMonster.data.expReward);
+            // 보상 지급 (이벤트로 처리)
+            GameEventManager.TriggerCurrencyChanged(
+                CurrencyType.Gold,
+                CurrentMonster.data.goldReward
+            );
+            GameEventManager.TriggerPlayerExpGained(
+                CurrentMonster.data.expReward
+            );
 
             monstersKilledInStage++;
             currentMonsterIndex++;
 
-            OnMonsterKilled?.Invoke(monstersKilledInStage);
-            OnStageProgress?.Invoke(GetStageProgress());
+            // 몬스터 처치 이벤트 발생 (기존 OnMonsterKilled 대체)
+            GameEventManager.TriggerMonsterKilled(CurrentMonster.data);
+
+            // 스테이지 진행도 이벤트 발생 (기존 OnStageProgress 대체)
+            GameEventManager.TriggerStageProgress(GetStageProgress());
 
             // 다음 몬스터 또는 스테이지 완료
             if (currentMonsterIndex >= CurrentStage.monsters.Count)
@@ -108,11 +118,17 @@ namespace RPG.Stage
 
         public void CompleteStage()
         {
-            // 스테이지 클리어 보상
-            currencyManager?.AddCurrency(CurrencyType.Gold, CurrentStage.clearGold);
-            playerController?.Status.AddExperience(CurrentStage.clearExp);
+            // 스테이지 클리어 보상 (이벤트로 처리)
+            GameEventManager.TriggerCurrencyChanged(
+                CurrencyType.Gold,
+                CurrentStage.clearGold
+            );
+            GameEventManager.TriggerPlayerExpGained(
+                CurrentStage.clearExp
+            );
 
-            OnStageComplete?.Invoke();
+            // 스테이지 클리어 이벤트 발생 (기존 OnStageComplete 대체)
+            GameEventManager.TriggerStageCleared(CurrentStage.stageNumber);
 
             // 다음 스테이지로
             if (currentStageIndex < stages.Count - 1)
@@ -179,5 +195,4 @@ namespace RPG.Stage
             CompleteStage();
         }
     }
-
 }

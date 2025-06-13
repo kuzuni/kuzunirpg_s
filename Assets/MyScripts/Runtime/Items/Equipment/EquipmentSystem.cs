@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using RPG.Player;
+using RPG.Core.Events;
 
 namespace RPG.Items.Equipment
 {
-
     public class EquipmentSystem : MonoBehaviour
     {
         [Title("장비 슬롯")]
@@ -53,10 +53,6 @@ namespace RPG.Items.Equipment
         private PlayerStatus playerStatus;
         private bool isInitialized = false;
 
-        // 이벤트
-        public event Action<EquipmentData, EquipmentType> OnEquipmentChanged;
-        public event Action<EquipmentType> OnEquipmentRemoved;
-
         public void Initialize(PlayerStatus status)
         {
             playerStatus = status;
@@ -67,11 +63,11 @@ namespace RPG.Items.Equipment
         private void InitializeSlots()
         {
             equipmentSlots = new Dictionary<EquipmentType, EquipmentSlot>
-        {
-            { EquipmentType.Weapon, new EquipmentSlot(EquipmentType.Weapon) },
-            { EquipmentType.Armor, new EquipmentSlot(EquipmentType.Armor) },
-            { EquipmentType.Ring, new EquipmentSlot(EquipmentType.Ring) }
-        };
+            {
+                { EquipmentType.Weapon, new EquipmentSlot(EquipmentType.Weapon) },
+                { EquipmentType.Armor, new EquipmentSlot(EquipmentType.Armor) },
+                { EquipmentType.Ring, new EquipmentSlot(EquipmentType.Ring) }
+            };
         }
 
         [Title("장비 관리")]
@@ -96,8 +92,10 @@ namespace RPG.Items.Equipment
             if (slot.Equip(equipment))
             {
                 ApplyEquipmentStats(equipment, true);
-                OnEquipmentChanged?.Invoke(equipment, equipment.equipmentType);
                 UpdateTotalBonuses();
+
+                // 이벤트 발생 (기존 OnEquipmentChanged 대체)
+                GameEventManager.TriggerEquipmentEquipped(equipment);
 
                 // 등급별 색상으로 로그 출력
                 var color = ColorUtility.ToHtmlStringRGB(RarityColors.GetRarityColor(equipment.rarity));
@@ -123,8 +121,10 @@ namespace RPG.Items.Equipment
             if (unequipped != null)
             {
                 ApplyEquipmentStats(unequipped, false);
-                OnEquipmentRemoved?.Invoke(slotType);
                 UpdateTotalBonuses();
+
+                // 이벤트 발생 (기존 OnEquipmentRemoved 대체)
+                GameEventManager.TriggerEquipmentUnequipped(slotType);
 
                 Debug.Log($"<color=yellow>{unequipped.equipmentName}을(를) 해제했습니다!</color>");
             }
@@ -156,6 +156,16 @@ namespace RPG.Items.Equipment
                     playerStatus.HpRegen += equipment.GetFinalHpRegen() * multiplier;
                     break;
             }
+
+            // 스탯 변경 이벤트 발생
+            NotifyStatChanges();
+        }
+
+        private void NotifyStatChanges()
+        {
+            GameEventManager.TriggerPlayerStatChanged(Common.StatType.MaxHp, playerStatus.MaxHp);
+            GameEventManager.TriggerPlayerStatChanged(Common.StatType.AttackPower, playerStatus.AttackPower);
+            GameEventManager.TriggerPlayerStatChanged(Common.StatType.HpRegen, playerStatus.HpRegen);
         }
 
         private void UpdateTotalBonuses()

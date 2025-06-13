@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿// AttackSystem.cs
+using UnityEngine;
 using System;
 using RPG.Combat.Interfaces;
+using RPG.Core.Events;
 
 namespace RPG.Player
 {
@@ -8,7 +10,7 @@ namespace RPG.Player
     {
         [SerializeField] private PlayerStatus playerStatus;
 
-        public event Action<bool, int> OnAttack; // bool: isCritical, int: damage
+        // 로컬 이벤트 제거 - GameEventManager 사용
 
         public int CalculateDamage()
         {
@@ -17,7 +19,9 @@ namespace RPG.Player
                 ? Mathf.RoundToInt(playerStatus.AttackPower * playerStatus.CritDamage)
                 : playerStatus.AttackPower;
 
-            OnAttack?.Invoke(isCritical, damage);
+            // 이벤트 발생 (기존 OnAttack 대체)
+            GameEventManager.TriggerDamageDealt(damage, isCritical);
+
             return damage;
         }
 
@@ -26,5 +30,4 @@ namespace RPG.Player
             return 1f / playerStatus.AttackSpeed;
         }
     }
-
 }

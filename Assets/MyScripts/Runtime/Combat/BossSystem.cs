@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System;
 using Sirenix.OdinInspector;
+using RPG.Core.Events;
+using RPG.Common;
+
 namespace RPG.Combat
 {
-
-    // 보스 시스템
     public class BossSystem : MonoBehaviour
     {
         [Title("보스 설정")]
@@ -15,13 +16,19 @@ namespace RPG.Combat
         [ProgressBar(0, "@bossTimerDuration", 0.8f, 0.3f, 0.3f)]
         private float remainingTime;
 
-        public event Action<bool> OnBossDefeated; // true: 성공, false: 실패
+        private Coroutine bossTimerCoroutine;
 
         public void StartBossTimer()
         {
             isBossStage = true;
             remainingTime = bossTimerDuration;
-            StartCoroutine(BossTimerCoroutine());
+
+            if (bossTimerCoroutine != null)
+            {
+                StopCoroutine(bossTimerCoroutine);
+            }
+
+            bossTimerCoroutine = StartCoroutine(BossTimerCoroutine());
         }
 
         private System.Collections.IEnumerator BossTimerCoroutine()
@@ -35,8 +42,8 @@ namespace RPG.Combat
             if (isBossStage)
             {
                 // 시간 초과 - 보스 전투 실패
-                OnBossDefeated?.Invoke(false);
                 isBossStage = false;
+                GameEventManager.TriggerBossFailed(0); // 현재 스테이지 번호는 StageManager에서 처리
             }
         }
 
@@ -45,17 +52,36 @@ namespace RPG.Combat
             if (!isBossStage) return;
 
             isBossStage = false;
-            OnBossDefeated?.Invoke(true);
 
-            // 보스 보상 지급
+            // 보스 보상 지급 (이벤트로 처리)
             GiveBossRewards();
+
+            // 보스 처치 성공 이벤트는 StageManager에서 처리
         }
 
         private void GiveBossRewards()
         {
             Debug.Log("보스 처치 보상 지급!");
-            // TODO: 실제 보상 로직
+
+            // 보스 보상은 일반 보상의 5배
+            GameEventManager.TriggerCurrencyChanged(CurrencyType.Gold, 5000);
+            GameEventManager.TriggerCurrencyChanged(CurrencyType.Diamond, 50);
+            GameEventManager.TriggerPlayerExpGained(2500);
+        }
+
+        public void StopBossTimer()
+        {
+            if (bossTimerCoroutine != null)
+            {
+                StopCoroutine(bossTimerCoroutine);
+                bossTimerCoroutine = null;
+            }
+            isBossStage = false;
+        }
+
+        private void OnDestroy()
+        {
+            StopBossTimer();
         }
     }
-
 }

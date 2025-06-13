@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using RPG.Common;
+using RPG.Core.Events;
 namespace RPG.Managers
 {
 
@@ -25,8 +26,7 @@ namespace RPG.Managers
         public long Energy => currencies[CurrencyType.Energy];
         public long SoulStone => currencies[CurrencyType.SoulStone];
 
-        public event Action<CurrencyType, long> OnCurrencyChanged;
-
+      
         private void Start()
         {
             // 초기 화폐 설정
@@ -39,23 +39,24 @@ namespace RPG.Managers
             return currencies.ContainsKey(type) && currencies[type] >= amount;
         }
 
-        public bool TrySpend(CurrencyType type, long amount)
-        {
-            if (!CanAfford(type, amount)) return false;
-
-            currencies[type] -= amount;
-            OnCurrencyChanged?.Invoke(type, currencies[type]);
-            return true;
-        }
-
         public void AddCurrency(CurrencyType type, long amount)
         {
             if (!currencies.ContainsKey(type)) return;
 
             currencies[type] += amount;
-            OnCurrencyChanged?.Invoke(type, currencies[type]);
+
+            // 중앙 이벤트 시스템으로 전파
+            GameEventManager.TriggerCurrencyChanged(type, currencies[type]);
         }
 
+        public bool TrySpend(CurrencyType type, long amount)
+        {
+            if (!CanAfford(type, amount)) return false;
+
+            currencies[type] -= amount;
+            GameEventManager.TriggerCurrencyChanged(type, currencies[type]);
+            return true;
+        }
         [Title("디버그")]
         [Button("골드 추가 (+10,000)", ButtonSizes.Medium)]
         [GUIColor(1f, 0.8f, 0.3f)]
