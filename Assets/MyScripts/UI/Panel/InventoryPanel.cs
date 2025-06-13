@@ -1,57 +1,64 @@
 ﻿using UnityEngine;
 using Sirenix.OdinInspector;
+using RPG.UI.Base;
+using RPG.Inventory;
 // 인벤토리 패널
-public class InventoryPanel : BaseUIPanel
+namespace RPG.UI.Panels
 {
-    [Title("인벤토리")]
-    [TabGroup("Items", "장비")]
-    [SerializeField] private EquipmentInventorySystem equipmentInventory;
-    
-    [TabGroup("Items", "유물")]
-    [SerializeField] private RelicInventorySystem relicInventory;
-    
-    [ShowInInspector, ReadOnly]
-    [TabGroup("Items", "장비")]
-    private int equipmentCount;
-    
-    [ShowInInspector, ReadOnly]
-    [TabGroup("Items", "유물")]
-    private int relicCount;
-    
-    public override void UpdatePanel()
+
+    public class InventoryPanel : BaseUIPanel
     {
-        if (equipmentInventory != null)
+        [Title("인벤토리")]
+        [TabGroup("Items", "장비")]
+        [SerializeField] private EquipmentInventorySystem equipmentInventory;
+
+        [TabGroup("Items", "유물")]
+        [SerializeField] private RelicInventorySystem relicInventory;
+
+        [ShowInInspector, ReadOnly]
+        [TabGroup("Items", "장비")]
+        private int equipmentCount;
+
+        [ShowInInspector, ReadOnly]
+        [TabGroup("Items", "유물")]
+        private int relicCount;
+
+        public override void UpdatePanel()
         {
-            equipmentCount = equipmentInventory.GetTotalItemCount();
+            if (equipmentInventory != null)
+            {
+                equipmentCount = equipmentInventory.GetTotalItemCount();
+            }
+
+            if (relicInventory != null)
+            {
+                relicCount = relicInventory.GetTotalItemCount();
+            }
+
+            RefreshInventoryUI();
         }
-        
-        if (relicInventory != null)
+
+        private void RefreshInventoryUI()
         {
-            relicCount = relicInventory.GetTotalItemCount();
+            Debug.Log($"인벤토리 새로고침 - 장비: {equipmentCount}개, 유물: {relicCount}개");
         }
-        
-        RefreshInventoryUI();
+
+        [Button("정렬", ButtonSizes.Medium)]
+        [ButtonGroup("Actions")]
+        private void SortInventory()
+        {
+            equipmentInventory?.SortInventory();
+            relicInventory?.SortInventory();
+            UpdatePanel();
+        }
+
+        [Button("일괄 판매", ButtonSizes.Medium)]
+        [ButtonGroup("Actions")]
+        [GUIColor(0.8f, 0.3f, 0.3f)]
+        private void SellBulk()
+        {
+            Debug.Log("낮은 등급 아이템 일괄 판매");
+        }
     }
-    
-    private void RefreshInventoryUI()
-    {
-        Debug.Log($"인벤토리 새로고침 - 장비: {equipmentCount}개, 유물: {relicCount}개");
-    }
-    
-    [Button("정렬", ButtonSizes.Medium)]
-    [ButtonGroup("Actions")]
-    private void SortInventory()
-    {
-        equipmentInventory?.SortInventory();
-        relicInventory?.SortInventory();
-        UpdatePanel();
-    }
-    
-    [Button("일괄 판매", ButtonSizes.Medium)]
-    [ButtonGroup("Actions")]
-    [GUIColor(0.8f, 0.3f, 0.3f)]
-    private void SellBulk()
-    {
-        Debug.Log("낮은 등급 아이템 일괄 판매");
-    }
+
 }

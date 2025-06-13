@@ -1,15 +1,19 @@
 ﻿
-// 몬스터 인스턴스
-public class MonsterInstance
+namespace RPG.Stage
 {
-    public MonsterData data;
-    public int CurrentHp { get; set; }
-    public int MaxHp => data.maxHp;
-    public string MonsterName => data.monsterName;
-    
-    public MonsterInstance(MonsterData monsterData)
+    // 몬스터 인스턴스
+    public class MonsterInstance
     {
-        data = monsterData;
-        CurrentHp = MaxHp;
+        public MonsterData data;
+        public int CurrentHp { get; set; }
+        public int MaxHp => data.maxHp;
+        public string MonsterName => data.monsterName;
+
+        public MonsterInstance(MonsterData monsterData)
+        {
+            data = monsterData;
+            CurrentHp = MaxHp;
+        }
     }
 }
+

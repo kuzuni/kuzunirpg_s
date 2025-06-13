@@ -1,10 +1,15 @@
 ﻿// ===== EquipmentType.cs =====
-public enum EquipmentType
+
+namespace RPG.Items.Equipment
 {
-    Weapon,     // 무기
-    Armor,      // 갑옷
-    Ring        // 반지
+    public enum EquipmentType
+    {
+        Weapon,     // 무기
+        Armor,      // 갑옷
+        Ring        // 반지
+    }
 }
+
 
 // ===== PlayerManager.cs 수정 =====
 // PlayerManager의 Awake 메서드에 추가:

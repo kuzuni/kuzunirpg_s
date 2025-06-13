@@ -1,24 +1,28 @@
 ﻿using UnityEngine;
 // 체력 재생 시스템
-public class HealthRegenerationSystem : MonoBehaviour
+namespace RPG.Player
 {
-    [SerializeField] private PlayerStatus playerStatus;
-    [SerializeField] private HealthSystem healthSystem;
-
-    private float regenTimer = 0f;
-
-    void Update()
+    public class HealthRegenerationSystem : MonoBehaviour
     {
-        if (playerStatus.CurrentHp < playerStatus.MaxHp && playerStatus.HpRegen > 0)
-        {
-            regenTimer += Time.deltaTime;
+        [SerializeField] private PlayerStatus playerStatus;
+        [SerializeField] private HealthSystem healthSystem;
 
-            if (regenTimer >= 1f)
+        private float regenTimer = 0f;
+
+        void Update()
+        {
+            if (playerStatus.CurrentHp < playerStatus.MaxHp && playerStatus.HpRegen > 0)
             {
-                int regenAmount = Mathf.RoundToInt(playerStatus.HpRegen);
-                healthSystem.Heal(regenAmount);
-                regenTimer = 0f;
+                regenTimer += Time.deltaTime;
+
+                if (regenTimer >= 1f)
+                {
+                    int regenAmount = Mathf.RoundToInt(playerStatus.HpRegen);
+                    healthSystem.Heal(regenAmount);
+                    regenTimer = 0f;
+                }
             }
         }
     }
+
 }

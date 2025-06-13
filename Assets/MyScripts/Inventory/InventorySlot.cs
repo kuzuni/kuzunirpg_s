@@ -1,56 +1,60 @@
 using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
-
-// 제네릭 인벤토리 슬롯
-[Serializable]
-public class InventorySlot<T> where T : class
+using RPG.Gacha.Base;
+using RPG.Items.Relic;
+namespace RPG.Inventory.Base
 {
-    [HorizontalGroup("Slot", 0.15f)]
-    [VerticalGroup("Slot/Icon")]
-    [PreviewField(50), HideLabel]
-    [ShowIf("@GetIcon() != null")]
-    [ShowInInspector]
-    public Sprite Icon => GetIcon();
-
-    [VerticalGroup("Slot/Info")]
-    [LabelText("아이템")]
-    public T item;
-
-    [VerticalGroup("Slot/Info")]
-    [LabelText("수량")]
-    [MinValue(1)]
-    public int quantity = 1;
-
-    // 기본 생성자 (제네릭 제약 조건을 위해 필요)
-    public InventorySlot()
+    // 제네릭 인벤토리 슬롯
+    [Serializable]
+    public class InventorySlot<T> where T : class
     {
-        this.item = null;
-        this.quantity = 1;
-    }
+        [HorizontalGroup("Slot", 0.15f)]
+        [VerticalGroup("Slot/Icon")]
+        [PreviewField(50), HideLabel]
+        [ShowIf("@GetIcon() != null")]
+        [ShowInInspector]
+        public Sprite Icon => GetIcon();
 
-    public InventorySlot(T item, int quantity = 1)
-    {
-        this.item = item;
-        this.quantity = quantity;
-    }
+        [VerticalGroup("Slot/Info")]
+        [LabelText("아이템")]
+        public T item;
 
-    private Sprite GetIcon()
-    {
-        if (item == null) return null;
+        [VerticalGroup("Slot/Info")]
+        [LabelText("수량")]
+        [MinValue(1)]
+        public int quantity = 1;
 
-        // IGachaItem 인터페이스를 구현한 경우
-        if (item is IGachaItem gachaItem)
+        // 기본 생성자 (제네릭 제약 조건을 위해 필요)
+        public InventorySlot()
         {
-            return gachaItem.Icon;
+            this.item = null;
+            this.quantity = 1;
         }
 
-        // RelicInstance인 경우
-        if (item is RelicInstance relicInstance)
+        public InventorySlot(T item, int quantity = 1)
         {
-            return relicInstance.Icon;
+            this.item = item;
+            this.quantity = quantity;
         }
 
-        return null;
+        private Sprite GetIcon()
+        {
+            if (item == null) return null;
+
+            // IGachaItem 인터페이스를 구현한 경우
+            if (item is IGachaItem gachaItem)
+            {
+                return gachaItem.Icon;
+            }
+
+            // RelicInstance인 경우
+            if (item is RelicInstance relicInstance)
+            {
+                return relicInstance.Icon;
+            }
+
+            return null;
+        }
     }
 }

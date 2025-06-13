@@ -1,12 +1,16 @@
 ﻿// ===== EquipmentType.cs =====
 // ===== IEquipmentSlot.cs =====
-public interface IEquipmentSlot
+namespace RPG.Items.Equipment
 {
-    EquipmentData CurrentEquipment { get; }
-    bool Equip(EquipmentData equipment);
-    EquipmentData Unequip();
-    bool IsEmpty { get; }
+    public interface IEquipmentSlot
+    {
+        EquipmentData CurrentEquipment { get; }
+        bool Equip(EquipmentData equipment);
+        EquipmentData Unequip();
+        bool IsEmpty { get; }
+    }
 }
+
 
 // ===== PlayerManager.cs 수정 =====
 // PlayerManager의 Awake 메서드에 추가:

@@ -2,109 +2,130 @@
 using System;
 using Sirenix.OdinInspector;
 // UI 패널 베이스 클래스 (Open/Closed Principle)
-public abstract class BaseUIPanel : MonoBehaviour, IUIPanel
-{
-    [Title("패널 설정")]
-    [SerializeField] protected GameObject panelRoot;
-    [SerializeField] protected CanvasGroup canvasGroup;
-    
-    [SerializeField] protected bool useAnimation = true;
-    [SerializeField, ShowIf("useAnimation")] protected float animationDuration = 0.3f;
-    
-    [ShowInInspector, ReadOnly]
-    public bool IsVisible { get; private set; }
-    
-    protected bool isAnimating = false;
-    
-    public event Action OnPanelShown;
-    public event Action OnPanelHidden;
-    
-    protected virtual void Awake()
+namespace RPG.UI.Base
+{ // UI 상태 관리 인터페이스 (Single Responsibility)
+    public interface IUIState
     {
-        if (panelRoot == null) panelRoot = gameObject;
-        if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
+        void Enter();
+        void Exit();
+        void UpdateState();
     }
-    
-    public virtual void Show()
+
+    // UI 패널 기본 인터페이스 (Interface Segregation)
+    public interface IUIPanel
     {
-        if (IsVisible || isAnimating) return;
-        
-        IsVisible = true;
-        panelRoot.SetActive(true);
-        
-        if (useAnimation && canvasGroup != null)
+        void Show();
+        void Hide();
+        void UpdatePanel();
+        bool IsVisible { get; }
+    }
+
+
+    public abstract class BaseUIPanel : MonoBehaviour, IUIPanel
+    {
+        [Title("패널 설정")]
+        [SerializeField] protected GameObject panelRoot;
+        [SerializeField] protected CanvasGroup canvasGroup;
+
+        [SerializeField] protected bool useAnimation = true;
+        [SerializeField, ShowIf("useAnimation")] protected float animationDuration = 0.3f;
+
+        [ShowInInspector, ReadOnly]
+        public bool IsVisible { get; private set; }
+
+        protected bool isAnimating = false;
+
+        public event Action OnPanelShown;
+        public event Action OnPanelHidden;
+
+        protected virtual void Awake()
         {
-            StartCoroutine(FadeIn());
+            if (panelRoot == null) panelRoot = gameObject;
+            if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
         }
-        else
+
+        public virtual void Show()
         {
+            if (IsVisible || isAnimating) return;
+
+            IsVisible = true;
+            panelRoot.SetActive(true);
+
+            if (useAnimation && canvasGroup != null)
+            {
+                StartCoroutine(FadeIn());
+            }
+            else
+            {
+                OnShowComplete();
+            }
+        }
+
+        public virtual void Hide()
+        {
+            if (!IsVisible || isAnimating) return;
+
+            IsVisible = false;
+
+            if (useAnimation && canvasGroup != null)
+            {
+                StartCoroutine(FadeOut());
+            }
+            else
+            {
+                OnHideComplete();
+            }
+        }
+
+        public abstract void UpdatePanel();
+
+        protected virtual void OnShowComplete()
+        {
+            OnPanelShown?.Invoke();
+            UpdatePanel();
+        }
+
+        protected virtual void OnHideComplete()
+        {
+            panelRoot.SetActive(false);
+            OnPanelHidden?.Invoke();
+        }
+
+        private System.Collections.IEnumerator FadeIn()
+        {
+            isAnimating = true;
+            float elapsed = 0;
+
+            while (elapsed < animationDuration)
+            {
+                elapsed += Time.deltaTime;
+                float progress = elapsed / animationDuration;
+                canvasGroup.alpha = Mathf.Lerp(0, 1, progress);
+                yield return null;
+            }
+
+            canvasGroup.alpha = 1;
+            isAnimating = false;
             OnShowComplete();
         }
-    }
-    
-    public virtual void Hide()
-    {
-        if (!IsVisible || isAnimating) return;
-        
-        IsVisible = false;
-        
-        if (useAnimation && canvasGroup != null)
+
+        private System.Collections.IEnumerator FadeOut()
         {
-            StartCoroutine(FadeOut());
-        }
-        else
-        {
+            isAnimating = true;
+            float elapsed = 0;
+
+            while (elapsed < animationDuration)
+            {
+                elapsed += Time.deltaTime;
+                float progress = elapsed / animationDuration;
+                canvasGroup.alpha = Mathf.Lerp(1, 0, progress);
+                yield return null;
+            }
+
+            canvasGroup.alpha = 0;
+            isAnimating = false;
             OnHideComplete();
         }
     }
-    
-    public abstract void UpdatePanel();
-    
-    protected virtual void OnShowComplete()
-    {
-        OnPanelShown?.Invoke();
-        UpdatePanel();
-    }
-    
-    protected virtual void OnHideComplete()
-    {
-        panelRoot.SetActive(false);
-        OnPanelHidden?.Invoke();
-    }
-    
-    private System.Collections.IEnumerator FadeIn()
-    {
-        isAnimating = true;
-        float elapsed = 0;
-        
-        while (elapsed < animationDuration)
-        {
-            elapsed += Time.deltaTime;
-            float progress = elapsed / animationDuration;
-            canvasGroup.alpha = Mathf.Lerp(0, 1, progress);
-            yield return null;
-        }
-        
-        canvasGroup.alpha = 1;
-        isAnimating = false;
-        OnShowComplete();
-    }
-    
-    private System.Collections.IEnumerator FadeOut()
-    {
-        isAnimating = true;
-        float elapsed = 0;
-        
-        while (elapsed < animationDuration)
-        {
-            elapsed += Time.deltaTime;
-            float progress = elapsed / animationDuration;
-            canvasGroup.alpha = Mathf.Lerp(1, 0, progress);
-            yield return null;
-        }
-        
-        canvasGroup.alpha = 0;
-        isAnimating = false;
-        OnHideComplete();
-    }
+
 }

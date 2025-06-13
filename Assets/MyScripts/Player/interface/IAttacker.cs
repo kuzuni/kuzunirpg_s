@@ -1,7 +1,11 @@
 ﻿
-// 공격 시스템
-public interface IAttacker
+namespace RPG.Combat.Interfaces
 {
-    int CalculateDamage();
-    float GetAttackCooldown();
+    // 공격 시스템
+    public interface IAttacker
+    {
+        int CalculateDamage();
+        float GetAttackCooldown();
+    }
+
 }
