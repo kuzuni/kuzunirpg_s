@@ -138,12 +138,12 @@ namespace RPG.Enhancement
             // 모든 스탯 타입에 대해 초기화
             enhancementLevels = new List<StatEnhancementLevel>
             {
-                new StatEnhancementLevel { statType = StatType.MaxHp, baseEnhancementValue = 20f, isPercentage = false, maxLevel = 10 },
-                new StatEnhancementLevel { statType = StatType.AttackPower, baseEnhancementValue = 3f, isPercentage = false, maxLevel = 10 },
-                new StatEnhancementLevel { statType = StatType.CritChance, baseEnhancementValue = 0.02f, isPercentage = false, maxLevel = 5 },
-                new StatEnhancementLevel { statType = StatType.CritDamage, baseEnhancementValue = 0.1f, isPercentage = false, maxLevel = 5 },
+                new StatEnhancementLevel { statType = StatType.MaxHp, baseEnhancementValue = 20f, isPercentage = false, maxLevel = 100000 },
+                new StatEnhancementLevel { statType = StatType.AttackPower, baseEnhancementValue = 3f, isPercentage = false, maxLevel = 100000 },
+                new StatEnhancementLevel { statType = StatType.CritChance, baseEnhancementValue = 0.02f, isPercentage = false, maxLevel = 5000 },
+                new StatEnhancementLevel { statType = StatType.CritDamage, baseEnhancementValue = 0.1f, isPercentage = false, maxLevel = 1000000 },
                 new StatEnhancementLevel { statType = StatType.AttackSpeed, baseEnhancementValue = 5f, isPercentage = true, maxLevel = 10 },
-                new StatEnhancementLevel { statType = StatType.HpRegen, baseEnhancementValue = 0.5f, isPercentage = false, maxLevel = 10 }
+                new StatEnhancementLevel { statType = StatType.HpRegen, baseEnhancementValue = 0.5f, isPercentage = false, maxLevel = 100000 }
             };
         }
 

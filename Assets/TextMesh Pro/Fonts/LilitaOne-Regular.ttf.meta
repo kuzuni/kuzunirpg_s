@@ -1,0 +1,28 @@
+fileFormatVersion: 2
+guid: 478376115fca0b74bb5e8a1808447e91
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Lilita One
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 315169
+  packageName: Idle Game Vertical Ui Kit
+  packageVersion: 1.0.2
+  assetPath: Assets/TextMesh Pro/Fonts/LilitaOne-Regular.ttf
+  uploadId: 758403

@@ -7,3 +7,10 @@ ShaderImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 315169
+  packageName: Idle Game Vertical Ui Kit
+  packageVersion: 1.0.2
+  assetPath: Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader
+  uploadId: 758403

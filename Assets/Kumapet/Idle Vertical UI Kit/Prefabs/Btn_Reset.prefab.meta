@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4feee98e18e983944a44a72882a20ea5
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 315169
+  packageName: Idle Game Vertical Ui Kit
+  packageVersion: 1.0.2
+  assetPath: Assets/Kumapet/Idle Vertical UI Kit/Prefabs/Btn_Reset.prefab
+  uploadId: 758403

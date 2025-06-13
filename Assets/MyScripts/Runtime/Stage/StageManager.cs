@@ -4,11 +4,17 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using RPG.Core.Events;
 using RPG.Common;
+using RPG.Player;
+using RPG.Managers;
 
 namespace RPG.Stage
 {
     public class StageManager : MonoBehaviour, IStageManager
     {
+        [Title("시스템 참조")]
+        [SerializeField, Required] private PlayerController playerController;
+        [SerializeField, Required] private CurrencyManager currencyManager;  // 추가
+
         [Title("스테이지 설정")]
         [SerializeField] private List<StageData> stages = new List<StageData>();
 
@@ -26,6 +32,26 @@ namespace RPG.Stage
 
         private void Start()
         {
+            // PlayerController 찾기
+            if (playerController == null)
+            {
+                playerController = FindObjectOfType<PlayerController>();
+                if (playerController == null)
+                {
+                    Debug.LogError("PlayerController를 찾을 수 없습니다!");
+                }
+            }
+
+            // CurrencyManager 찾기
+            if (currencyManager == null)
+            {
+                currencyManager = FindObjectOfType<CurrencyManager>();
+                if (currencyManager == null)
+                {
+                    Debug.LogError("CurrencyManager를 찾을 수 없습니다!");
+                }
+            }
+
             // 테스트용 스테이지 생성
             if (stages.Count == 0)
             {
@@ -43,7 +69,7 @@ namespace RPG.Stage
 
             SpawnNextMonster();
 
-            // 이벤트 발생 (기존 OnStageChanged 대체)
+            // 이벤트 발생
             GameEventManager.TriggerStageStarted(CurrentStage);
         }
 
@@ -87,22 +113,28 @@ namespace RPG.Stage
         {
             if (CurrentMonster == null) return;
 
-            // 보상 지급 (이벤트로 처리)
-            GameEventManager.TriggerCurrencyChanged(
-                CurrencyType.Gold,
-                CurrentMonster.data.goldReward
-            );
-            GameEventManager.TriggerPlayerExpGained(
-                CurrentMonster.data.expReward
-            );
+            // 보상 지급 - 실제로 플레이어에게 경험치 추가
+            if (playerController != null)
+            {
+                // 경험치 추가 (이 메서드가 내부적으로 이벤트도 발생시킴)
+                playerController.Status.AddExperience(CurrentMonster.data.expReward);
+                Debug.Log($"경험치 {CurrentMonster.data.expReward} 획득!");
+            }
+
+            // ✅ 골드 보상 - CurrencyManager의 AddCurrency 사용
+            if (currencyManager != null)
+            {
+                currencyManager.AddCurrency(CurrencyType.Gold, CurrentMonster.data.goldReward);
+                Debug.Log($"골드 {CurrentMonster.data.goldReward} 획득!");
+            }
 
             monstersKilledInStage++;
             currentMonsterIndex++;
 
-            // 몬스터 처치 이벤트 발생 (기존 OnMonsterKilled 대체)
+            // 몬스터 처치 이벤트 발생
             GameEventManager.TriggerMonsterKilled(CurrentMonster.data);
 
-            // 스테이지 진행도 이벤트 발생 (기존 OnStageProgress 대체)
+            // 스테이지 진행도 이벤트 발생
             GameEventManager.TriggerStageProgress(GetStageProgress());
 
             // 다음 몬스터 또는 스테이지 완료
@@ -118,16 +150,22 @@ namespace RPG.Stage
 
         public void CompleteStage()
         {
-            // 스테이지 클리어 보상 (이벤트로 처리)
-            GameEventManager.TriggerCurrencyChanged(
-                CurrencyType.Gold,
-                CurrentStage.clearGold
-            );
-            GameEventManager.TriggerPlayerExpGained(
-                CurrentStage.clearExp
-            );
+            // 스테이지 클리어 보상
+            if (playerController != null)
+            {
+                // 스테이지 클리어 경험치 추가
+                playerController.Status.AddExperience(CurrentStage.clearExp);
+                Debug.Log($"스테이지 클리어! 보너스 경험치 {CurrentStage.clearExp} 획득!");
+            }
 
-            // 스테이지 클리어 이벤트 발생 (기존 OnStageComplete 대체)
+            // ✅ 스테이지 클리어 골드 - CurrencyManager의 AddCurrency 사용
+            if (currencyManager != null)
+            {
+                currencyManager.AddCurrency(CurrencyType.Gold, CurrentStage.clearGold);
+                Debug.Log($"스테이지 클리어! 보너스 골드 {CurrentStage.clearGold} 획득!");
+            }
+
+            // 스테이지 클리어 이벤트 발생
             GameEventManager.TriggerStageCleared(CurrentStage.stageNumber);
 
             // 다음 스테이지로
@@ -193,6 +231,31 @@ namespace RPG.Stage
         private void DebugSkipStage()
         {
             CompleteStage();
+        }
+
+        [Button("골드 100 추가 테스트", ButtonSizes.Medium)]
+        [GUIColor(0.8f, 0.8f, 0.3f)]
+        private void DebugAddGold()
+        {
+            if (currencyManager != null)
+            {
+                currencyManager.AddCurrency(CurrencyType.Gold, 100);
+                Debug.Log("골드 100 추가!");
+            }
+            else
+            {
+                Debug.LogError("CurrencyManager가 없습니다!");
+            }
+        }
+
+
+        [Button("현재 골드 확인", ButtonSizes.Medium)]
+        private void DebugCheckGold()
+        {
+            if (currencyManager != null)
+            {
+                Debug.Log($"현재 골드: {currencyManager.Gold}");
+            }
         }
     }
 }

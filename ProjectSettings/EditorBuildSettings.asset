@@ -8,6 +8,81 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Common/Scenes/Demo/Demo - Portrait.unity
+    guid: a4baf494bd2d04a6ab80224214a01c45
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Classic/Scenes/Portrait/Portrait - Classic
+      - Game.unity
+    guid: 2c9b2a10bdcf7491883f73d04f64bd24
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Classic/Scenes/Portrait/Portrait - Classic
+      - Home.unity
+    guid: a04638d424f28455e979e947b18bb847
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Dark/Scenes/Portrait/Portrait - Dark
+      - Game.unity
+    guid: 14f42f0d374f74684b479af0801d3886
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Dark/Scenes/Portrait/Portrait - Dark
+      - Home.unity
+    guid: c14daf8d5c5e7415d8e4415545b1519c
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Fantasy/Scenes/Portrait/Portrait - Fantasy
+      - Game.unity
+    guid: 07715915fb4da4e8587a49fe8c9a5f4c
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Fantasy/Scenes/Portrait/Portrait - Fantasy
+      - Home.unity
+    guid: bf7549ba5dff14f9995b45a22ea097b4
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Minimalist/Scenes/Portrait/Portrait
+      - Minimalist - Game.unity
+    guid: 92d7ce8e8802147898bb7a0b53a418ad
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Minimalist/Scenes/Portrait/Portrait
+      - Minimalist - Home.unity
+    guid: 88b2e2185713144e29596109c06dc7b7
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Modern Dark/Scenes/Portrait/Portrait
+      - Modern Dark - Game.unity
+    guid: 414598f1bee164b4891348e278b4253f
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Modern Dark/Scenes/Portrait/Portrait
+      - Modern Dark - Home.unity
+    guid: aa240fa5602524f249379df00358c59c
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Modern Light/Scenes/Portrait/Portrait
+      - Modern Light - Game.unity
+    guid: ea27cf76a97ae48208ea3b23a1dedeb7
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Modern Light/Scenes/Portrait/Portrait
+      - Modern Light - Home.unity
+    guid: 7020e17da1a5a4cf69c0f8b41fc9c94a
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Round Dark/Scenes/Portrait/Portrait
+      - Round Dark - Game.unity
+    guid: e7fd6fbd6cd804cd8a26c6233be6e02e
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Round Dark/Scenes/Portrait/Portrait
+      - Round Dark - Home.unity
+    guid: 56fb664a2484c4274b91443f400c20dc
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Round Light/Scenes/Portrait/Portrait
+      - Round Light - Game.unity
+    guid: ecb95ca9f7f6641b9adeeb886ae2ffa4
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/Round Light/Scenes/Portrait/Portrait
+      - Round Light - Home.unity
+    guid: 68a691fb317c34284909389f6d539a7a
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/SciFi/Scenes/Portrait/Portrait - SciFi
+      - Game.unity
+    guid: 634838859a71043759374589a795c435
+  - enabled: 0
+    path: Assets/UltimateCleanGUIPack/Themes/SciFi/Scenes/Portrait/Portrait - SciFi
+      - Home.unity
+    guid: 3048256dc1c0140869fa68e3049780ab
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

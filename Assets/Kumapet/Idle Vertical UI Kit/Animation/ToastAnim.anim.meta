@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c18ce8a3b49fd4a4ea2d36f098505914
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 315169
+  packageName: Idle Game Vertical Ui Kit
+  packageVersion: 1.0.2
+  assetPath: Assets/Kumapet/Idle Vertical UI Kit/Animation/ToastAnim.anim
+  uploadId: 758403

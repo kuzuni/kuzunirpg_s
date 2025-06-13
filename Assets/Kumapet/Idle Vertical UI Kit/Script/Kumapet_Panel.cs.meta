@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6c00698a10a976c4ba5095a52b23aa01
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 315169
+  packageName: Idle Game Vertical Ui Kit
+  packageVersion: 1.0.2
+  assetPath: Assets/Kumapet/Idle Vertical UI Kit/Script/Kumapet_Panel.cs
+  uploadId: 758403
