@@ -9,6 +9,7 @@ using RPG.UI.Base;
 using RPG.Stage;
 using RPG.Items.Equipment;
 using RPG.Items.Relic;
+using TMPro;
 
 namespace RPG.UI
 {
@@ -19,15 +20,16 @@ namespace RPG.UI
         [HorizontalGroup("Main/플레이어 정보/Top", 0.3f)]
         [VerticalGroup("Main/플레이어 정보/Top/Profile")]
         [PreviewField(80), HideLabel]
+        [ShowIf("@playerAvatar != null")]  // null 체크 추가
         [SerializeField] private Image playerAvatar;
 
         [VerticalGroup("Main/플레이어 정보/Top/Info")]
         [LabelText("플레이어 이름")]
-        [SerializeField] private Text playerNameText;
+        [SerializeField] private TextMeshProUGUI playerNameText;
 
         [VerticalGroup("Main/플레이어 정보/Top/Info")]
         [LabelText("플레이어 레벨")]
-        [SerializeField] private Text playerLevelText;
+        [SerializeField] private TextMeshProUGUI playerLevelText;
 
         [VerticalGroup("Main/플레이어 정보/Top/Info")]
         [LabelText("경험치 바")]
@@ -37,30 +39,32 @@ namespace RPG.UI
         [BoxGroup("Main/자원 표시/골드")]
         [HorizontalGroup("Main/자원 표시/골드/H")]
         [LabelText("아이콘"), PreviewField(40)]
+        [ShowIf("@goldIcon != null")]  // null 체크 추가
         [SerializeField] private Image goldIcon;
 
         [HorizontalGroup("Main/자원 표시/골드/H")]
         [LabelText("텍스트")]
-        [SerializeField] private Text goldText;
+        [SerializeField] private TextMeshProUGUI goldText;
 
         [BoxGroup("Main/자원 표시/다이아몬드")]
         [HorizontalGroup("Main/자원 표시/다이아몬드/H")]
         [LabelText("아이콘"), PreviewField(40)]
+        [ShowIf("@diamondIcon != null")]  // null 체크 추가
         [SerializeField] private Image diamondIcon;
 
         [HorizontalGroup("Main/자원 표시/다이아몬드/H")]
         [LabelText("텍스트")]
-        [SerializeField] private Text diamondText;
+        [SerializeField] private TextMeshProUGUI diamondText;
 
         [Title("전투 화면", "현재 스테이지 정보")]
         [TabGroup("Combat", "스테이지")]
         [BoxGroup("Combat/스테이지/현재 스테이지")]
-        [SerializeField] private Text stageNumberText;
-        [SerializeField] private Text stageName;
+        [SerializeField] private TextMeshProUGUI stageNumberText;
+        [SerializeField] private TextMeshProUGUI stageName;
         [SerializeField] private Slider stageProgressBar;
 
         [BoxGroup("Combat/스테이지/몬스터 정보")]
-        [SerializeField] private Text monsterNameText;
+        [SerializeField] private TextMeshProUGUI monsterNameText;
         [SerializeField] private Slider monsterHealthBar;
         [SerializeField] private GameObject monsterHealthBarGroup;
 
@@ -548,7 +552,7 @@ namespace RPG.UI
             {
                 var effect = Instantiate(expGainEffectPrefab, effectContainer);
                 // 경험치 텍스트 설정
-                var textComponent = effect.GetComponentInChildren<Text>();
+                var textComponent = effect.GetComponentInChildren<TextMeshProUGUI>();
                 if (textComponent) textComponent.text = $"+{exp} EXP";
 
                 Destroy(effect, 1.5f);
@@ -640,6 +644,61 @@ namespace RPG.UI
             if (cachedStageData != null)
             {
                 OnStageCleared(cachedStageData.stageNumber);
+            }
+        }
+
+        [Title("UI 요소 확인")]
+        [Button("Missing UI 요소 체크", ButtonSizes.Large)]
+        [GUIColor(1f, 0.5f, 0.5f)]
+        private void CheckMissingUIElements()
+        {
+            int missingCount = 0;
+            string missingElements = "Missing UI Elements:\n";
+
+            // 플레이어 정보
+            if (!playerAvatar) { missingElements += "- Player Avatar\n"; missingCount++; }
+            if (!playerNameText) { missingElements += "- Player Name Text\n"; missingCount++; }
+            if (!playerLevelText) { missingElements += "- Player Level Text\n"; missingCount++; }
+            if (!experienceBar) { missingElements += "- Experience Bar\n"; missingCount++; }
+
+            // 자원
+            if (!goldIcon) { missingElements += "- Gold Icon\n"; missingCount++; }
+            if (!goldText) { missingElements += "- Gold Text\n"; missingCount++; }
+            if (!diamondIcon) { missingElements += "- Diamond Icon\n"; missingCount++; }
+            if (!diamondText) { missingElements += "- Diamond Text\n"; missingCount++; }
+
+            // 스테이지
+            if (!stageNumberText) { missingElements += "- Stage Number Text\n"; missingCount++; }
+            if (!stageName) { missingElements += "- Stage Name\n"; missingCount++; }
+            if (!stageProgressBar) { missingElements += "- Stage Progress Bar\n"; missingCount++; }
+
+            // 몬스터
+            if (!monsterNameText) { missingElements += "- Monster Name Text\n"; missingCount++; }
+            if (!monsterHealthBar) { missingElements += "- Monster Health Bar\n"; missingCount++; }
+            if (!monsterHealthBarGroup) { missingElements += "- Monster Health Bar Group\n"; missingCount++; }
+
+            // 버튼
+            if (!characterButton) { missingElements += "- Character Button\n"; missingCount++; }
+            if (!inventoryButton) { missingElements += "- Inventory Button\n"; missingCount++; }
+            if (!skillButton) { missingElements += "- Skill Button\n"; missingCount++; }
+            if (!shopButton) { missingElements += "- Shop Button\n"; missingCount++; }
+
+            // 패널
+            if (!characterPanel) { missingElements += "- Character Panel\n"; missingCount++; }
+            if (!inventoryPanel) { missingElements += "- Inventory Panel\n"; missingCount++; }
+            if (!skillPanel) { missingElements += "- Skill Panel\n"; missingCount++; }
+            if (!shopPanel) { missingElements += "- Shop Panel\n"; missingCount++; }
+
+            // 이펙트
+            if (!effectContainer) { missingElements += "- Effect Container\n"; missingCount++; }
+
+            if (missingCount == 0)
+            {
+                Debug.Log("<color=green>All UI elements are properly assigned!</color>");
+            }
+            else
+            {
+                Debug.LogWarning($"<color=yellow>{missingCount} UI elements are missing:</color>\n{missingElements}");
             }
         }
 

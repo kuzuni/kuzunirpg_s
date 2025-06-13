@@ -45,7 +45,17 @@ namespace RPG.Player
 
 
 
+        private void OnLevelChanged()
+        {
+            // 레벨이 변경될 때 처리할 로직
+            if (Application.isPlaying)
+            {
+                Debug.Log($"레벨이 {level}로 변경되었습니다.");
 
+                // 경험치 바 업데이트
+                currentExp = Mathf.Min(currentExp, GetMaxExp() - 1);
+            }
+        }
         private void LevelUp()
         {
             level++;
