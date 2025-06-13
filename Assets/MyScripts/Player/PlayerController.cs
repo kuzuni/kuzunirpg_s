@@ -1,5 +1,5 @@
 ﻿// 플레이어 매니저 (통합 관리)
-using RPG.Items.Enhancement;
+using RPG.Enhancement ;
 using RPG.Items.Equipment;
 using RPG.Items.Relic;
 using UnityEngine;

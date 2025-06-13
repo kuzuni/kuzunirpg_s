@@ -5,7 +5,7 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using RPG.Player;
 using RPG.Common;
-namespace RPG.Items.Enhancement
+namespace RPG.Enhancement 
 {
 
     // 강화 시스템 인터페이스
