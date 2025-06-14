@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using DG.Tweening;
 using Sirenix.OdinInspector;
+
 namespace RPG.UI.Popup
 {
     public class PopupUI : MonoBehaviour
@@ -46,7 +47,7 @@ namespace RPG.UI.Popup
         public enum PopupContainerType
         {
             UI,     // 일반 UI 컨테이너
-            Scene   // Scene 전용 컨테이너
+            Scene   // Scene 레벨 컨테이너
         }
 
         public enum DimType
@@ -66,10 +67,11 @@ namespace RPG.UI.Popup
             SlideLeft,      // 오른쪽에서 왼쪽으로
             SlideRight,     // 왼쪽에서 오른쪽으로
             Rotate,         // 회전하며 나타남
-            Custom          // 커스텀 Ease 설정
+            Custom          // 커스텀 Ease 사용
         }
 
-        private void Awake()
+        // Virtual 메서드들 - 하위 클래스에서 override 가능
+        protected virtual void Awake()
         {
             originalScale = transform.localScale;
             originalPosition = transform.localPosition;
@@ -80,11 +82,72 @@ namespace RPG.UI.Popup
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
 
+        protected virtual void Start()
+        {
+            // 하위 클래스에서 필요시 override
+        }
+
+        protected virtual void OnEnable()
+        {
+            // 하위 클래스에서 필요시 override
+        }
+
+        protected virtual void OnDisable()
+        {
+            // 하위 클래스에서 필요시 override
+        }
+
+        protected virtual void OnDestroy()
+        {
+            // DOTween 정리
+            transform.DOKill();
+            if (canvasGroup) canvasGroup.DOKill();
+            if (dimImage) dimImage.DOKill();
+
+            // Dim 오브젝트 제거
+            if (dimObject) Destroy(dimObject);
+        }
+
+        /// <summary>
+        /// 팝업이 열리기 전 호출
+        /// </summary>
+        protected virtual void OnBeforeOpen()
+        {
+            // 하위 클래스에서 필요시 override
+        }
+
+        /// <summary>
+        /// 팝업이 열린 후 호출
+        /// </summary>
+        protected virtual void OnAfterOpen()
+        {
+            // 하위 클래스에서 필요시 override
+        }
+
+        /// <summary>
+        /// 팝업이 닫히기 전 호출
+        /// </summary>
+        protected virtual void OnBeforeClose()
+        {
+            // 하위 클래스에서 필요시 override
+        }
+
+        /// <summary>
+        /// 팝업이 닫힌 후 호출
+        /// </summary>
+        protected virtual void OnAfterClose()
+        {
+            // 하위 클래스에서 필요시 override
+        }
+
         /// <summary>
         /// 팝업 열기
         /// </summary>
         public void Open(Action onOpen = null, Action onClose = null)
         {
+            // 열기 전 콜백
+            OnBeforeOpen();
+
             gameObject.SetActive(true);
             onCloseCallback = onClose;
 
@@ -94,12 +157,13 @@ namespace RPG.UI.Popup
                 CreateDim();
             }
 
-            // 애니메이션 시작 전 초기화
+            // 애니메이션 전에 초기화
             transform.DOKill();
             canvasGroup.DOKill();
 
             PlayOpenAnimation(() =>
             {
+                OnAfterOpen();
                 onOpen?.Invoke();
             });
         }
@@ -136,7 +200,7 @@ namespace RPG.UI.Popup
             // Dim 페이드 인
             dimImage.DOFade(dimAlpha, animationDuration * 0.8f);
 
-            // 팝업을 Dim 위로 이동
+            // 팝업이 Dim 위에 오도록
             transform.SetAsLastSibling();
         }
 
@@ -145,6 +209,9 @@ namespace RPG.UI.Popup
         /// </summary>
         public void Close()
         {
+            // 닫기 전 콜백
+            OnBeforeClose();
+
             // 중복 호출 방지
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
@@ -163,6 +230,7 @@ namespace RPG.UI.Popup
                     Destroy(dimObject);
                 }
 
+                OnAfterClose();
                 onCloseCallback?.Invoke();
                 Destroy(gameObject);
             });
@@ -298,17 +366,6 @@ namespace RPG.UI.Popup
                         .OnComplete(() => onComplete?.Invoke());
                     break;
             }
-        }
-
-        private void OnDestroy()
-        {
-            // DOTween 정리
-            transform.DOKill();
-            if (canvasGroup) canvasGroup.DOKill();
-            if (dimImage) dimImage.DOKill();
-
-            // Dim 오브젝트 정리
-            if (dimObject) Destroy(dimObject);
         }
 
         [Title("테스트")]

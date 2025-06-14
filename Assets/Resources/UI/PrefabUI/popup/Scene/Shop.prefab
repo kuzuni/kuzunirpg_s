@@ -48,6 +48,7 @@ GameObject:
   - component: {fileID: 567616915653393008}
   - component: {fileID: 5782379245753172864}
   - component: {fileID: 2338176802336896877}
+  - component: {fileID: 4478190599124477365}
   m_Layer: 0
   m_Name: Weapon
   m_TagString: Untagged
@@ -117,6 +118,43 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4478190599124477365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 135225649360091933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e36cb45a4fca7f428539b0c1554fb2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipmentGachaSystem: {fileID: 0}
+  relicGachaSystem: {fileID: 0}
+  equipmentPull1Button: {fileID: 1149441706220284007}
+  equipmentPull11Button: {fileID: 1177951178260066841}
+  equipmentPull55Button: {fileID: 6905388261809680923}
+  relicPull1Button: {fileID: 0}
+  relicPull10Button: {fileID: 0}
+  equipmentCost1Text: {fileID: 3227988451073742417}
+  equipmentCost11Text: {fileID: 4222558316797909780}
+  equipmentCost55Text: {fileID: 7516487329393808989}
+  relicCost1Text: {fileID: 0}
+  relicCost10Text: {fileID: 0}
+  equipmentPitySlider: {fileID: 0}
+  equipmentPityText: {fileID: 0}
+  relicPitySlider: {fileID: 0}
+  relicPityText: {fileID: 0}
+  popupManager: {fileID: 0}
+  gachaResultPopupPrefab: {fileID: 781192667143241453, guid: 013f30fce5cee8c469f9e00169c8bda0, type: 3}
+  equipmentCost1: 1
+  equipmentCost11: 1
+  equipmentCost55: 1
+  relicCost1: 20
+  relicCost10: 200
+  animateButtons: 1
+  buttonPressScale: 0.95
 --- !u!1 &500250065956284432
 GameObject:
   m_ObjectHideFlags: 0
