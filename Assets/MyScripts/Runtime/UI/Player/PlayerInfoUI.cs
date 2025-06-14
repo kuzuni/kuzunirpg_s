@@ -5,7 +5,7 @@ using Sirenix.OdinInspector;
 using RPG.Core.Events;
 using DG.Tweening;
 
-namespace RPG.Player.UI
+namespace RPG.UI.Player
 {
     public class PlayerInfoUI : MonoBehaviour
     {

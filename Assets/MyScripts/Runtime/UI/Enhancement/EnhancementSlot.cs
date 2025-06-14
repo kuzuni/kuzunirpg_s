@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using RPG.UI.Components;
+
 namespace RPG.UI.Enhancement
 {
-
     [RequireComponent(typeof(RectTransform))]
     public class EnhancementSlot : MonoBehaviour
     {
@@ -26,19 +26,22 @@ namespace RPG.UI.Enhancement
         private TextMeshProUGUI currentValueText;
 
         [SerializeField]
-        private TextMeshProUGUI nextValueText;  // 이제 사용하지 않음 (숨기거나 제거 가능)
+        private TextMeshProUGUI nextValueText;
 
         [SerializeField, Required]
-        private TextMeshProUGUI currentLevelText;  // 이제 사용하지 않음 (숨기거나 제거 가능)
+        private TextMeshProUGUI currentLevelText;
 
         [SerializeField, Required]
-        private TextMeshProUGUI maxLevelText;  // 최대 레벨만 표시
+        private TextMeshProUGUI maxLevelText;
 
         [SerializeField, Required]
         private Button enhanceButton;
 
         [SerializeField, Required]
         private TextMeshProUGUI costText;
+
+        [SerializeField]
+        private TextMeshProUGUI enhanceCountText; // 강화 횟수 표시
 
         [Title("색상 설정")]
         [SerializeField]
@@ -51,16 +54,22 @@ namespace RPG.UI.Enhancement
         private Color cantAffordColor = new Color(0.5f, 0.5f, 0.5f);
 
         [SerializeField]
-        private Color nextValueColor = new Color(0.2f, 1f, 0.2f);  // 강화 후 수치 색상
+        private Color nextValueColor = new Color(0.2f, 1f, 0.2f);
+
+        [SerializeField]
+        private Color multiEnhanceColor = new Color(1f, 0.5f, 0.8f);
 
         // 상태
         private int currentLevel = 0;
         private int maxLevel = 10;
         private long enhanceCost = 1000;
         private float currentEnhancementValue = 0;
+        private float baseEnhancementValue = 0; // 추가: 기본 강화값 저장
         private bool isPercentageStat = false;
         private EnhancementUI parentUI;
         private LongPressButton longPressButton;
+        private EnhancementUI.EnhanceMode currentMode = EnhancementUI.EnhanceMode.x1;
+        private int possibleEnhanceCount = 1;
 
         // Properties
         public StatType StatType => statType;
@@ -78,25 +87,21 @@ namespace RPG.UI.Enhancement
                 statIcon.sprite = icon;
             }
 
-            // 텍스트 설정 - 초기에는 레벨 없이 이름만
             if (statNameText != null)
             {
                 statNameText.text = GetStatDisplayName(statType);
             }
 
-            // 버튼 이벤트 설정
             if (enhanceButton != null)
             {
                 enhanceButton.onClick.RemoveAllListeners();
 
-                // LongPressButton 컴포넌트 추가 또는 가져오기
                 longPressButton = enhanceButton.GetComponent<LongPressButton>();
                 if (longPressButton == null)
                 {
                     longPressButton = enhanceButton.gameObject.AddComponent<LongPressButton>();
                 }
 
-                // 이벤트 연결
                 longPressButton.OnClick -= OnEnhanceClicked;
                 longPressButton.OnLongPressRepeat -= OnEnhanceClicked;
 
@@ -105,12 +110,17 @@ namespace RPG.UI.Enhancement
             }
         }
 
-        public void UpdateSlot(int level, int max, float enhancementValue, bool isPercentage)
+        // 메서드 시그니처 수정 - baseValue 추가
+        public void UpdateSlot(int level, int max, float enhancementValue, bool isPercentage,
+            EnhancementUI.EnhanceMode mode = EnhancementUI.EnhanceMode.x1, int possibleCount = 1, float baseValue = 0)
         {
             currentLevel = level;
             maxLevel = max;
             currentEnhancementValue = enhancementValue;
             isPercentageStat = isPercentage;
+            currentMode = mode;
+            possibleEnhanceCount = possibleCount;
+            baseEnhancementValue = baseValue;
 
             // 스탯 이름과 레벨을 함께 표시
             if (statNameText != null)
@@ -122,17 +132,15 @@ namespace RPG.UI.Enhancement
                 }
                 else
                 {
-                    statNameText.text = $"{displayName} Lv. {level}";
+                    statNameText.text = $"{displayName} <color=white>Lv. {level}</color>";
                 }
             }
 
-            // 최대 레벨 텍스트
             if (maxLevelText != null)
             {
                 maxLevelText.text = $"Max Lv.{max}";
             }
 
-            // currentLevelText와 nextValueText는 더 이상 사용하지 않으므로 비활성화
             if (currentLevelText != null)
             {
                 currentLevelText.gameObject.SetActive(false);
@@ -143,10 +151,23 @@ namespace RPG.UI.Enhancement
                 nextValueText.gameObject.SetActive(false);
             }
 
-            // 현재값 → 다음값 형식으로 표시
+            // 강화 횟수 표시
+            if (enhanceCountText != null)
+            {
+                if (currentMode != EnhancementUI.EnhanceMode.x1 && possibleEnhanceCount > 0)
+                {
+                    enhanceCountText.gameObject.SetActive(true);
+                    enhanceCountText.text = $"x{possibleEnhanceCount}";
+                    enhanceCountText.color = possibleEnhanceCount < (int)currentMode ? Color.yellow : multiEnhanceColor;
+                }
+                else
+                {
+                    enhanceCountText.gameObject.SetActive(false);
+                }
+            }
+
             UpdateValueDisplay();
 
-            // 최대 레벨 처리
             if (currentLevel >= maxLevel)
             {
                 if (enhanceButton != null)
@@ -154,6 +175,70 @@ namespace RPG.UI.Enhancement
 
                 if (costText != null)
                     costText.text = "-";
+            }
+        }
+
+        private void UpdateValueDisplay()
+        {
+            if (currentValueText == null) return;
+
+            string currentValueStr = GetFormattedValue(currentEnhancementValue);
+
+            if (currentLevel >= maxLevel)
+            {
+                currentValueText.text = currentValueStr;
+                currentValueText.color = maxedColor;
+            }
+            else
+            {
+                // 정확한 다음 값 계산
+                float nextValue;
+
+                if (baseEnhancementValue > 0)
+                {
+                    // baseEnhancementValue가 설정된 경우 정확한 계산
+                    nextValue = baseEnhancementValue * (currentLevel + possibleEnhanceCount);
+                }
+                else
+                {
+                    // baseEnhancementValue가 없는 경우 현재 값으로부터 추정
+                    if (currentLevel > 0)
+                    {
+                        float estimatedBaseValue = currentEnhancementValue / currentLevel;
+                        nextValue = estimatedBaseValue * (currentLevel + possibleEnhanceCount);
+                    }
+                    else
+                    {
+                        // 레벨 0인 경우 기본값 사용
+                        nextValue = GetDefaultBaseValue(statType) * possibleEnhanceCount;
+                    }
+                }
+
+                string nextValueStr = GetFormattedValue(nextValue);
+
+                if (possibleEnhanceCount > 1)
+                {
+                    currentValueText.text = $"{currentValueStr}<color=#{ColorUtility.ToHtmlStringRGB(multiEnhanceColor)}>>{nextValueStr}</color>";
+                }
+                else
+                {
+                    currentValueText.text = $"{currentValueStr}<color=green>>>{nextValueStr}</color>";
+                }
+            }
+        }
+
+        // 스탯별 기본값 (EnhancementSystem의 값과 동일하게 설정)
+        private float GetDefaultBaseValue(StatType type)
+        {
+            switch (type)
+            {
+                case StatType.MaxHp: return 20f;
+                case StatType.AttackPower: return 3f;
+                case StatType.CritChance: return 0.02f;
+                case StatType.CritDamage: return 0.1f;
+                case StatType.AttackSpeed: return 5f;
+                case StatType.HpRegen: return 0.5f;
+                default: return 1f;
             }
         }
 
@@ -168,32 +253,17 @@ namespace RPG.UI.Enhancement
             }
             else
             {
-                costText.text = $"{cost:N0}";
+                if (currentMode != EnhancementUI.EnhanceMode.x1 && possibleEnhanceCount > 0)
+                {
+                    costText.text = $"{cost:N0} ({possibleEnhanceCount}x)";
+                }
+                else
+                {
+                    costText.text = $"{cost:N0}";
+                }
+
                 enhanceButton.interactable = canAfford;
                 costText.color = canAfford ? Color.white : cantAffordColor;
-            }
-        }
-
-        private void UpdateValueDisplay()
-        {
-            if (currentValueText == null) return;
-
-            string currentValueStr = GetFormattedValue(currentEnhancementValue);
-
-            if (currentLevel >= maxLevel)
-            {
-                // 최대 레벨일 때는 현재 값만 표시
-                currentValueText.text = currentValueStr;
-                currentValueText.color = maxedColor;
-            }
-            else
-            {
-                // 다음 레벨 값 계산 (20% 증가)
-                float nextValue = currentEnhancementValue * 1.2f;
-                string nextValueStr = GetFormattedValue(nextValue);
-
-                // 현재값→다음값 형식으로 표시
-                currentValueText.text = $"{currentValueStr}→{nextValueStr}";
             }
         }
 
@@ -202,19 +272,19 @@ namespace RPG.UI.Enhancement
             switch (statType)
             {
                 case StatType.MaxHp:
-                    return $"+{value:F0}";
+                    return $"{value:F0}";
                 case StatType.AttackPower:
-                    return $"+{value:F0}";
+                    return $"{value:F0}";
                 case StatType.CritChance:
-                    return $"+{value:F2}%";
+                    return $"{value:F2}%";
                 case StatType.CritDamage:
-                    return $"+{value:F1}%";
+                    return $"{value:F1}%";
                 case StatType.AttackSpeed:
-                    return isPercentageStat ? $"+{value:F0}%" : $"+{value:F1}";
+                    return isPercentageStat ? $"{value:F0}%" : $"{value:F1}";
                 case StatType.HpRegen:
-                    return $"+{value:F1}/s";
+                    return $"{value:F1}/s";
                 default:
-                    return $"+{value:F0}";
+                    return $"{value:F0}";
             }
         }
 
@@ -223,30 +293,38 @@ namespace RPG.UI.Enhancement
             parentUI?.OnEnhanceRequested(statType, enhanceCost);
         }
 
-        // 버튼 원래 색상 저장
         private Color buttonOriginalColor;
         private bool isButtonColorSaved = false;
-
         public void PlayEnhanceAnimation()
         {
             // 버튼 플래시 및 크기 애니메이션
             Image buttonImage = enhanceButton.GetComponent<Image>();
             if (buttonImage != null)
             {
-                // 원래 색상 저장 (처음 한 번만)
                 if (!isButtonColorSaved)
                 {
                     buttonOriginalColor = buttonImage.color;
                     isButtonColorSaved = true;
                 }
 
-                // 기존 애니메이션 중지하고 원래 색상으로 즉시 복원
                 buttonImage.DOKill(true);
                 buttonImage.color = buttonOriginalColor;
 
                 // 색상 애니메이션
                 Color enhanceColor;
-                ColorUtility.TryParseHtmlString("#286F4C", out enhanceColor);
+                if (possibleEnhanceCount >= 100)
+                {
+                    ColorUtility.TryParseHtmlString("#FF1744", out enhanceColor); // 빨간색
+                }
+                else if (possibleEnhanceCount >= 10)
+                {
+                    ColorUtility.TryParseHtmlString("#FFC107", out enhanceColor); // 주황색
+                }
+                else
+                {
+                    ColorUtility.TryParseHtmlString("#286F4C", out enhanceColor); // 녹색
+                }
+
                 buttonImage.DOColor(enhanceColor, 0.1f)
                     .SetEase(Ease.InOutQuad)
                     .OnComplete(() =>
@@ -256,34 +334,43 @@ namespace RPG.UI.Enhancement
                     });
             }
 
-            // 버튼 크기 애니메이션
+            // 버튼 크기 애니메이션 - 단일 펄스
             if (enhanceButton != null)
             {
                 enhanceButton.transform.DOKill(true);
                 enhanceButton.transform.localScale = Vector3.one;
-                enhanceButton.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 10, 1f);
+
+                // 강화 횟수에 따라 펄스 강도만 조절
+                float punchScale = possibleEnhanceCount >= 100 ? 0.4f :
+                                  possibleEnhanceCount >= 10 ? 0.3f : 0.2f;
+
+                enhanceButton.transform.DOPunchScale(Vector3.one * punchScale, 0.3f, 10, 1f);
             }
 
-            // 값 텍스트 애니메이션
+            // 값 텍스트 애니메이션 - 단일 펄스
             if (currentValueText != null)
             {
-                // 기존 애니메이션 중지하고 스케일 초기화
                 currentValueText.transform.DOKill(true);
                 currentValueText.transform.localScale = Vector3.one;
 
-                // 새 애니메이션 시작
-                currentValueText.transform.DOPunchScale(Vector3.one * 0.3f, 0.3f, 10, 1f);
+                float textPunchScale = possibleEnhanceCount >= 100 ? 0.4f :
+                                      possibleEnhanceCount >= 10 ? 0.35f : 0.3f;
+
+                currentValueText.transform.DOPunchScale(Vector3.one * textPunchScale, 0.3f, 10, 1f);
             }
 
-            // 스탯 이름 텍스트도 애니메이션 (레벨업 느낌)
+            // 스탯 이름 텍스트 애니메이션 - 단일 펄스
             if (statNameText != null)
             {
                 statNameText.transform.DOKill(true);
                 statNameText.transform.localScale = Vector3.one;
-                statNameText.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 10, 1f);
+
+                float namePunchScale = possibleEnhanceCount >= 100 ? 0.3f :
+                                       possibleEnhanceCount >= 10 ? 0.25f : 0.2f;
+
+                statNameText.transform.DOPunchScale(Vector3.one * namePunchScale, 0.3f, 10, 1f);
             }
         }
-
         private string GetStatDisplayName(StatType type)
         {
             switch (type)
@@ -300,28 +387,24 @@ namespace RPG.UI.Enhancement
 
         private void OnDestroy()
         {
-            // 이벤트 해제
             if (longPressButton != null)
             {
                 longPressButton.OnClick -= OnEnhanceClicked;
                 longPressButton.OnLongPressRepeat -= OnEnhanceClicked;
             }
 
-            // 애니메이션 정리 - 완료 콜백까지 즉시 실행
             if (enhanceButton != null)
             {
                 Image buttonImage = enhanceButton.GetComponent<Image>();
                 if (buttonImage != null)
                 {
                     buttonImage.DOKill(true);
-                    // 원래 색상으로 복원
                     if (isButtonColorSaved)
                     {
                         buttonImage.color = buttonOriginalColor;
                     }
                 }
 
-                // 버튼 크기 애니메이션 정리
                 enhanceButton.transform.DOKill(true);
                 enhanceButton.transform.localScale = Vector3.one;
             }

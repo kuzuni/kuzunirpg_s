@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using DG.Tweening;
+using TMPro;
+
 namespace RPG.UI.Enhancement
 {
     public class EnhancementUI : MonoBehaviour
@@ -31,6 +33,49 @@ namespace RPG.UI.Enhancement
         [SerializeField]
         private float costMultiplier = 1.5f;
 
+        [Title("강화 모드 설정")]
+        [SerializeField, Required]
+        private GameObject enhanceModeContainer;
+
+        [SerializeField, Required]
+        private UnityEngine.UI.Button mode1xButton;
+
+        [SerializeField, Required]
+        private UnityEngine.UI.Button mode10xButton;
+
+        [SerializeField, Required]
+        private UnityEngine.UI.Button mode100xButton;
+
+        [Title("모드별 색상 설정")]
+        [SerializeField]
+        private Color mode1xColor = new Color(0.3f, 0.69f, 0.31f); // 녹색
+
+        [SerializeField]
+        private Color mode10xColor = new Color(1f, 0.76f, 0.03f); // 주황색
+
+        [SerializeField]
+        private Color mode100xColor = new Color(1f, 0.09f, 0.27f); // 빨간색
+
+        [SerializeField]
+        private Color normalModeColor = Color.white;
+
+        [SerializeField]
+        private Color normalTextColor = Color.black;
+
+        [SerializeField]
+        private Color selectedTextColor = Color.white;
+
+        // 강화 모드 enum
+        public enum EnhanceMode
+        {
+            x1 = 1,
+            x10 = 10,
+            x100 = 100
+        }
+
+        [ShowInInspector, ReadOnly]
+        private EnhanceMode currentMode = EnhanceMode.x1;
+
         // 시스템 참조
         private EnhancementSystem enhancementSystem;
         private PlayerController playerController;
@@ -43,8 +88,10 @@ namespace RPG.UI.Enhancement
         {
             InitializeSystems();
             CreateSlots();
+            SetupModeButtons();
             SubscribeToEvents();
             RefreshAllSlots();
+            UpdateModeButtonVisuals();
         }
 
         private void OnDestroy()
@@ -61,6 +108,140 @@ namespace RPG.UI.Enhancement
             }
 
             currencyManager = FindObjectOfType<CurrencyManager>();
+        }
+
+        private void SetupModeButtons()
+        {
+            if (mode1xButton != null)
+            {
+                mode1xButton.onClick.RemoveAllListeners();
+                mode1xButton.onClick.AddListener(() => SetEnhanceMode(EnhanceMode.x1));
+            }
+
+            if (mode10xButton != null)
+            {
+                mode10xButton.onClick.RemoveAllListeners();
+                mode10xButton.onClick.AddListener(() => SetEnhanceMode(EnhanceMode.x10));
+            }
+
+            if (mode100xButton != null)
+            {
+                mode100xButton.onClick.RemoveAllListeners();
+                mode100xButton.onClick.AddListener(() => SetEnhanceMode(EnhanceMode.x100));
+            }
+        }
+
+        private void SetEnhanceMode(EnhanceMode mode)
+        {
+            // 이전 모드 버튼 애니메이션
+            var previousButton = GetModeButton(currentMode);
+            if (previousButton != null)
+            {
+                previousButton.transform.DOScale(1f, 0.1f);
+            }
+
+            currentMode = mode;
+            UpdateModeButtonVisuals();
+            RefreshAllSlots();
+
+            // 새로운 모드 버튼 애니메이션
+            var newButton = GetModeButton(mode);
+            if (newButton != null)
+            {
+                newButton.transform.DOKill();
+                newButton.transform.DOPunchScale(Vector3.one * 0.2f, 0.2f, 10, 1f);
+            }
+
+            Debug.Log($"<color=cyan>강화 모드 변경: {mode}</color>");
+        }
+
+        private UnityEngine.UI.Button GetModeButton(EnhanceMode mode)
+        {
+            switch (mode)
+            {
+                case EnhanceMode.x1: return mode1xButton;
+                case EnhanceMode.x10: return mode10xButton;
+                case EnhanceMode.x100: return mode100xButton;
+                default: return null;
+            }
+        }
+
+        private void UpdateModeButtonVisuals()
+        {
+            // 1x 버튼
+            if (mode1xButton != null)
+            {
+                var image = mode1xButton.GetComponent<UnityEngine.UI.Image>();
+                if (image != null)
+                {
+                    image.color = currentMode == EnhanceMode.x1 ? mode1xColor : normalModeColor;
+                }
+
+                var text = mode1xButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (text != null)
+                {
+                    text.fontStyle = currentMode == EnhanceMode.x1 ? FontStyles.Bold : FontStyles.Normal;
+                    text.color = currentMode == EnhanceMode.x1 ? selectedTextColor : normalTextColor;
+                }
+
+                var outline = mode1xButton.GetComponent<UnityEngine.UI.Outline>();
+                if (outline != null)
+                {
+                    outline.enabled = currentMode == EnhanceMode.x1;
+                    outline.effectColor = Color.white;
+                    outline.effectDistance = new Vector2(2, 2);
+                }
+            }
+
+            // 10x 버튼
+            if (mode10xButton != null)
+            {
+                var image = mode10xButton.GetComponent<UnityEngine.UI.Image>();
+                if (image != null)
+                {
+                    image.color = currentMode == EnhanceMode.x10 ? mode10xColor : normalModeColor;
+                }
+
+                var text = mode10xButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (text != null)
+                {
+                    text.fontStyle = currentMode == EnhanceMode.x10 ? FontStyles.Bold : FontStyles.Normal;
+                    text.color = currentMode == EnhanceMode.x10 ? selectedTextColor : normalTextColor;
+                }
+
+                var outline = mode10xButton.GetComponent<UnityEngine.UI.Outline>();
+                if (outline != null)
+                {
+                    outline.enabled = currentMode == EnhanceMode.x10;
+                    outline.effectColor = Color.white;
+                    outline.effectDistance = new Vector2(2, 2);
+                }
+            }
+
+            // 100x 버튼
+            if (mode100xButton != null)
+            {
+                var image = mode100xButton.GetComponent<UnityEngine.UI.Image>();
+                if (image != null)
+                {
+                    image.color = currentMode == EnhanceMode.x100 ? mode100xColor : normalModeColor;
+                }
+
+                var text = mode100xButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (text != null)
+                {
+                    text.fontStyle = currentMode == EnhanceMode.x100 ? FontStyles.Bold : FontStyles.Normal;
+                    text.color = currentMode == EnhanceMode.x100 ? selectedTextColor : normalTextColor;
+                }
+
+                var outline = mode100xButton.GetComponent<UnityEngine.UI.Outline>();
+                if (outline != null)
+                {
+                    outline.enabled = currentMode == EnhanceMode.x100;
+                    outline.effectColor = Color.white;
+                    outline.effectDistance = new Vector2(2, 2);
+                }
+            }
         }
 
         private void CreateSlots()
@@ -110,17 +291,28 @@ namespace RPG.UI.Enhancement
             var enhancementLevel = enhancementSystem.GetEnhancementLevel(slot.StatType);
             if (enhancementLevel != null)
             {
+                // 다중 강화 시 표시할 레벨 계산
+                int displayLevel = enhancementLevel.currentLevel;
+                int modeValue = (int)currentMode;
+
+                // 현재 레벨 + 강화 횟수가 최대치를 넘지 않도록
+                int possibleLevels = Math.Min(modeValue, enhancementLevel.maxLevel - enhancementLevel.currentLevel);
+
+                // 슬롯 업데이트 시 현재 모드 정보와 baseValue도 전달
                 slot.UpdateSlot(
                     enhancementLevel.currentLevel,
                     enhancementLevel.maxLevel,
                     enhancementLevel.GetEnhancementValue(),
-                    enhancementLevel.isPercentage
+                    enhancementLevel.isPercentage,
+                    currentMode,
+                    possibleLevels,
+                    enhancementLevel.baseEnhancementValue
                 );
 
-                // 비용 계산
-                long cost = CalculateEnhanceCost(slot.StatType, enhancementLevel.currentLevel);
-                bool canAfford = currencyManager != null && currencyManager.CanAfford(CurrencyType.Gold, cost);
-                slot.UpdateCost(cost, canAfford);
+                // 비용 계산 (다중 강화 비용)
+                long totalCost = CalculateMultiEnhanceCost(slot.StatType, enhancementLevel.currentLevel, possibleLevels);
+                bool canAfford = currencyManager != null && currencyManager.CanAfford(CurrencyType.Gold, totalCost);
+                slot.UpdateCost(totalCost, canAfford);
             }
         }
 
@@ -128,20 +320,83 @@ namespace RPG.UI.Enhancement
         {
             if (enhancementSystem == null || currencyManager == null) return;
 
+            var enhancementLevel = enhancementSystem.GetEnhancementLevel(statType);
+            if (enhancementLevel == null) return;
+
+            // 실제로 강화 가능한 횟수 계산
+            int modeValue = (int)currentMode;
+            int possibleLevels = Math.Min(modeValue, enhancementLevel.maxLevel - enhancementLevel.currentLevel);
+
+            if (possibleLevels <= 0)
+            {
+                Debug.Log("<color=yellow>이미 최대 레벨입니다!</color>");
+                return;
+            }
+
+            // 다중 강화 비용 재계산
+            long totalCost = CalculateMultiEnhanceCost(statType, enhancementLevel.currentLevel, possibleLevels);
+
             // 비용 지불
-            if (!currencyManager.TrySpend(CurrencyType.Gold, cost))
+            if (!currencyManager.TrySpend(CurrencyType.Gold, totalCost))
             {
                 ShowNotEnoughGoldMessage();
                 return;
             }
 
-            // 강화 실행
-            bool success = enhancementSystem.EnhanceStat(statType);
+            // 다중 강화 실행
+            int successCount = 0;
+            for (int i = 0; i < possibleLevels; i++)
+            {
+                bool success = enhancementSystem.EnhanceStat(statType);
+                if (success)
+                {
+                    successCount++;
+                }
+                else
+                {
+                    break; // 더 이상 강화 불가능
+                }
+            }
 
-            if (success && slots.ContainsKey(statType))
+            if (successCount > 0 && slots.ContainsKey(statType))
             {
                 slots[statType].PlayEnhanceAnimation();
+
+                // 다중 강화 시 추가 이펙트
+                if (successCount > 1)
+                {
+                    ShowMultiEnhanceEffect(statType, successCount);
+                }
             }
+
+            Debug.Log($"<color=green>{statType} {successCount}회 강화 완료!</color>");
+        }
+
+        private long CalculateMultiEnhanceCost(StatType statType, int currentLevel, int enhanceCount)
+        {
+            long totalCost = 0;
+
+            for (int i = 0; i < enhanceCount; i++)
+            {
+                totalCost += CalculateEnhanceCost(statType, currentLevel + i);
+            }
+
+            return totalCost;
+        }
+
+        private void ShowMultiEnhanceEffect(StatType statType, int count)
+        {
+            if (!slots.ContainsKey(statType)) return;
+
+            var slot = slots[statType];
+
+            // 다중 강화 시 더 강한 애니메이션
+            slot.transform.DOKill();
+            slot.transform.localScale = Vector3.one;
+
+            // 단일 펄스 효과 (강도만 다르게)
+            float pulseScale = count >= 100 ? 0.4f : count >= 10 ? 0.3f : 0.25f;
+            slot.transform.DOPunchScale(Vector3.one * pulseScale, 0.3f, 10, 1f);
         }
 
         private void SubscribeToEvents()
@@ -174,11 +429,8 @@ namespace RPG.UI.Enhancement
                 UpdateSlotData(slot);
 
                 // MAX 달성 애니메이션
-                // 기존 애니메이션 중지
                 slot.transform.DOKill();
                 slot.transform.localScale = Vector3.one;
-
-                // 새 애니메이션 시작
                 slot.transform.DOPunchScale(Vector3.one * 0.2f, 0.5f);
             }
         }
@@ -217,6 +469,17 @@ namespace RPG.UI.Enhancement
             CreateSlots();
             RefreshAllSlots();
         }
-    }
 
+        [ButtonGroup("Debug Mode")]
+        [Button("1x 모드", ButtonSizes.Medium)]
+        private void SetMode1x() => SetEnhanceMode(EnhanceMode.x1);
+
+        [ButtonGroup("Debug Mode")]
+        [Button("10x 모드", ButtonSizes.Medium)]
+        private void SetMode10x() => SetEnhanceMode(EnhanceMode.x10);
+
+        [ButtonGroup("Debug Mode")]
+        [Button("100x 모드", ButtonSizes.Medium)]
+        private void SetMode100x() => SetEnhanceMode(EnhanceMode.x100);
+    }
 }

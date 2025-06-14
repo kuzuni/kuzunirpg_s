@@ -10,8 +10,9 @@ using TMPro;
 using Sirenix.OdinInspector;
 using RPG.Core.Events;
 using DG.Tweening;
+using RPG.Stage;
 
-namespace RPG.Stage.UI
+namespace RPG.UI.Stage
 {
     public class StageUI : MonoBehaviour
     {
