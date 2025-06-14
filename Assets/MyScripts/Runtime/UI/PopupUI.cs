@@ -6,6 +6,10 @@ using Sirenix.OdinInspector;
 
 public class PopupUI : MonoBehaviour
 {
+    [Title("팝업 설정")]
+    [EnumToggleButtons]
+    public PopupContainerType containerType = PopupContainerType.UI;
+
     [Title("Dim 설정")]
     [EnumToggleButtons]
     public DimType dimType = DimType.Required;
@@ -37,6 +41,12 @@ public class PopupUI : MonoBehaviour
     private Vector3 originalPosition;
     private GameObject dimObject;
     private Image dimImage;
+
+    public enum PopupContainerType
+    {
+        UI,     // 일반 UI 컨테이너
+        Scene   // Scene 전용 컨테이너
+    }
 
     public enum DimType
     {

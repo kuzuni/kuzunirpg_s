@@ -5115,8 +5115,11 @@ GameObject:
   m_Component:
   - component: {fileID: 219745654789419609}
   - component: {fileID: 927244915086608081}
+  - component: {fileID: 7991739447589925998}
+  - component: {fileID: 87809676681794462}
+  - component: {fileID: 4460777575663309494}
   m_Layer: 0
-  m_Name: Menu_Gamble
+  m_Name: Shop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5139,10 +5142,10 @@ RectTransform:
   - {fileID: 9223316625130508896}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -476}
-  m_SizeDelta: {x: 0, y: 100}
+  m_AnchoredPosition: {x: 0, y: 425.737}
+  m_SizeDelta: {x: 0, y: 502.88}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &927244915086608081
 MonoBehaviour:
@@ -5170,6 +5173,64 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &7991739447589925998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460281930052925636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9513eca903eedd247a75ff8131629b53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  containerType: 1
+  dimType: 1
+  dimAlpha: 0.7
+  dimColor: {r: 0, g: 0, b: 0, a: 1}
+  animationType: 3
+  animationDuration: 0.3
+  customEaseIn: 27
+  customEaseOut: 26
+--- !u!222 &87809676681794462
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460281930052925636}
+  m_CullTransparentMesh: 1
+--- !u!114 &4460777575663309494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460281930052925636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0.17254902, b: 0.22352943, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &8481381064546867666
 GameObject:
   m_ObjectHideFlags: 0

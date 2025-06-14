@@ -2,29 +2,10 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public class PopupManager : SerializedMonoBehaviour
 {
-    #region Singleton
-    private static PopupManager instance;
-    public static PopupManager Instance
-    {
-        get
-        {
-            if (!instance)
-            {
-                instance = FindObjectOfType<PopupManager>();
-                if (!instance)
-                {
-                    GameObject go = new GameObject("[PopupManager]");
-                    instance = go.AddComponent<PopupManager>();
-                }
-            }
-            return instance;
-        }
-    }
-    #endregion
-
     [Title("팝업 타입")]
     public enum PopupType
     {
@@ -40,7 +21,10 @@ public class PopupManager : SerializedMonoBehaviour
         Team_Message,
         Gamble,
         Shop,
-        Attendance
+        Attendance,
+        Equipment,
+        Pet,
+        Adventure
     }
 
     [Title("컨테이너 설정")]
@@ -65,7 +49,10 @@ public class PopupManager : SerializedMonoBehaviour
         new PopupPrefabEntry { type = PopupType.Team_Message },
         new PopupPrefabEntry { type = PopupType.Gamble },
         new PopupPrefabEntry { type = PopupType.Shop },
-        new PopupPrefabEntry { type = PopupType.Attendance }
+        new PopupPrefabEntry { type = PopupType.Attendance },
+        new PopupPrefabEntry { type = PopupType.Equipment },
+        new PopupPrefabEntry { type = PopupType.Pet },
+        new PopupPrefabEntry { type = PopupType.Adventure }
     };
 
     [System.Serializable]
@@ -84,7 +71,7 @@ public class PopupManager : SerializedMonoBehaviour
 
     [Title("유틸리티")]
     [Button("프리팹 배열 초기화", ButtonSizes.Large), GUIColor(1f, 1f, 0.3f)]
-    [InfoBox("Attendance가 없다면 이 버튼을 눌러 배열을 다시 초기화하세요")]
+    [InfoBox("새로운 타입이 추가되었다면 이 버튼을 눌러 배열을 다시 초기화하세요")]
     private void ResetPrefabArray()
     {
         var oldEntries = popupEntries;
@@ -102,7 +89,10 @@ public class PopupManager : SerializedMonoBehaviour
             new PopupPrefabEntry { type = PopupType.Team_Message },
             new PopupPrefabEntry { type = PopupType.Gamble },
             new PopupPrefabEntry { type = PopupType.Shop },
-            new PopupPrefabEntry { type = PopupType.Attendance }
+            new PopupPrefabEntry { type = PopupType.Attendance },
+            new PopupPrefabEntry { type = PopupType.Equipment },
+            new PopupPrefabEntry { type = PopupType.Pet },
+            new PopupPrefabEntry { type = PopupType.Adventure }
         };
 
         // 기존 프리팹 복사
@@ -121,7 +111,7 @@ public class PopupManager : SerializedMonoBehaviour
             }
         }
 
-        Debug.Log("프리팹 배열이 초기화되었습니다. Attendance가 추가되었습니다.");
+        Debug.Log("프리팹 배열이 초기화되었습니다. 새로운 타입들이 추가되었습니다.");
     }
 
     [Title("현재 활성 팝업")]
@@ -135,15 +125,6 @@ public class PopupManager : SerializedMonoBehaviour
 
     private void Awake()
     {
-        if (instance && instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        instance = this;
-        DontDestroyOnLoad(gameObject);
-
         ValidateContainer();
 
         // 시작 시 모든 팝업이 닫혀있는지 확인
@@ -162,14 +143,16 @@ public class PopupManager : SerializedMonoBehaviour
                 Debug.Log($"[PopupManager] Container 자동 설정: {canvas.name}");
             }
         }
+
+        Debug.Log($"[PopupManager] Container: {(popupContainer ? popupContainer.name : "NULL")}");
     }
 
     /// <summary>
     /// 팝업 열기
     /// </summary>
-    public PopupUI Pop(PopupType type, Action onOpen = null, Action onClose = null)
+    public virtual PopupUI Pop(PopupType type, Action onOpen = null, Action onClose = null)
     {
-        Debug.Log($"[PopupManager] Pop 호출됨: {type}, 호출 스택:\n{System.Environment.StackTrace}");
+        Debug.Log($"[PopupManager] Pop 호출됨: {type}");
 
         // 기존 팝업 닫기
         if (currentPopup != null)
@@ -204,9 +187,11 @@ public class PopupManager : SerializedMonoBehaviour
             return null;
         }
 
-        // 새 팝업 생성
+        // 팝업 생성
         GameObject popupObj = Instantiate(prefab, popupContainer);
         currentPopup = popupObj.GetComponent<PopupUI>();
+
+        Debug.Log($"[PopupManager] 팝업 생성됨: {popupObj.name} in {popupObj.transform.parent.name}");
 
         currentPopupType = type;
 
@@ -288,6 +273,13 @@ public class PopupManager : SerializedMonoBehaviour
         Close();
     }
 
+    [Title("디버그 정보")]
+    [Button("컨테이너 정보 출력", ButtonSizes.Medium)]
+    private void DebugContainers()
+    {
+        Debug.Log($"Container: {(popupContainer ? popupContainer.name : "Not Set")}");
+    }
+
     #region 버튼용 Public 메서드
 
     [Title("버튼 OnClick용 메서드")]
@@ -306,6 +298,9 @@ public class PopupManager : SerializedMonoBehaviour
     public void PopGamble() => Pop(PopupType.Gamble);
     public void PopShop() => Pop(PopupType.Shop);
     public void PopAttendance() => Pop(PopupType.Attendance);
+    public void PopEquipment() => Pop(PopupType.Equipment);
+    public void PopPet() => Pop(PopupType.Pet);
+    public void PopAdventure() => Pop(PopupType.Adventure);
 
     #endregion
 }

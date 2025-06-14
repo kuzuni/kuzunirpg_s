@@ -297,7 +297,7 @@ GameObject:
   - component: {fileID: 815086053520300464}
   - component: {fileID: 2405730919750114648}
   - component: {fileID: 8500602991997471796}
-  - component: {fileID: 2668592827504225581}
+  - component: {fileID: 2759034918224368622}
   m_Layer: 0
   m_Name: Bt_Daily
   m_TagString: Untagged
@@ -363,7 +363,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &2668592827504225581
+--- !u!114 &2759034918224368622
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -372,7 +372,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 309482117862151190}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -404,9 +404,25 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 8500602991997471796}
-  m_OnClick:
+  toggleTransition: 1
+  graphic: {fileID: 0}
+  m_Group: {fileID: 7082524750623400479}
+  onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3216450014916284864}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_IsOn: 0
 --- !u!1 &320059221701424036
 GameObject:
   m_ObjectHideFlags: 0
@@ -6602,7 +6618,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4359727533796475501}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -6558984866681664758}
+        m_TargetAssemblyTypeName: PopupUI, Assembly-CSharp
+        m_MethodName: Close
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3657921866348859447
 GameObject:
   m_ObjectHideFlags: 0
@@ -7061,6 +7089,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5792208507963683300}
   - component: {fileID: -6558984866681664758}
+  - component: {fileID: 7082524750623400479}
   m_Layer: 0
   m_Name: Mission
   m_TagString: Untagged
@@ -7101,6 +7130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9513eca903eedd247a75ff8131629b53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  containerType: 0
   dimType: 1
   dimAlpha: 0.7
   dimColor: {r: 0, g: 0, b: 0, a: 1}
@@ -7108,6 +7138,19 @@ MonoBehaviour:
   animationDuration: 0.305
   customEaseIn: 27
   customEaseOut: 26
+--- !u!114 &7082524750623400479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3968326636022624291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fafe2cfe61f6974895a912c3755e8f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AllowSwitchOff: 1
 --- !u!1 &4007904161105932235
 GameObject:
   m_ObjectHideFlags: 0
@@ -12894,7 +12937,7 @@ GameObject:
   - component: {fileID: 3539841576007651956}
   - component: {fileID: 693108388635404551}
   - component: {fileID: 1061966101164242139}
-  - component: {fileID: 2689010123052261641}
+  - component: {fileID: 3961600494273643137}
   m_Layer: 0
   m_Name: Bt_Weekly
   m_TagString: Untagged
@@ -12960,7 +13003,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &2689010123052261641
+--- !u!114 &3961600494273643137
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12969,7 +13012,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7633177271857860098}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -13001,9 +13044,25 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 1061966101164242139}
-  m_OnClick:
+  toggleTransition: 1
+  graphic: {fileID: 0}
+  m_Group: {fileID: 7082524750623400479}
+  onValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8473845387454483460}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_IsOn: 0
 --- !u!1 &7656738874328205771
 GameObject:
   m_ObjectHideFlags: 0
