@@ -19,6 +19,18 @@ namespace RPG.UI.Gacha
     /// </summary>
     public class GachaUIController : MonoBehaviour
     {
+        [Title("가챠 모드")]
+        [EnumToggleButtons]
+        [OnValueChanged("OnGachaModeChanged")]
+        [SerializeField]
+        private GachaMode currentGachaMode = GachaMode.Equipment;
+
+        public enum GachaMode
+        {
+            Equipment,
+            Relic
+        }
+
         [Title("가챠 시스템 참조")]
         [SerializeField]
         [InfoBox("프리팹인 경우 자동으로 찾습니다", InfoMessageType.Info)]
@@ -27,60 +39,43 @@ namespace RPG.UI.Gacha
         [SerializeField]
         private RelicGachaSystem relicGachaSystem;
 
-        [Title("UI 참조")]
-        [TabGroup("Tab", "장비 가챠")]
-        [SerializeField, Required]
-        private Button equipmentPull1Button;
+        [Title("장비 가챠 설정")]
+        [ShowIf("currentGachaMode", GachaMode.Equipment)]
+        [SerializeField]
+        [EnumToggleButtons]
+        private EquipmentType currentEquipmentType = EquipmentType.Weapon;
 
-        [TabGroup("Tab", "장비 가챠")]
-        [SerializeField, Required]
-        private Button equipmentPull11Button;
+        [ShowIf("currentGachaMode", GachaMode.Equipment)]
+        [SerializeField]
+        [InfoBox("All Types를 선택하면 모든 타입이 랜덤하게 나옵니다")]
+        private bool useAllTypes = false;
 
-        [TabGroup("Tab", "장비 가챠")]
+        [Title("공통 UI 참조")]
         [SerializeField, Required]
-        private Button equipmentPull55Button;
+        private Button pull1Button;
 
-        [TabGroup("Tab", "유물 가챠")]
         [SerializeField, Required]
-        private Button relicPull1Button;
+        private Button pull11Button;
 
-        [TabGroup("Tab", "유물 가챠")]
         [SerializeField, Required]
-        private Button relicPull10Button;
+        private Button pull55Button;
 
         [Title("비용 텍스트")]
-        [TabGroup("Tab", "장비 가챠")]
         [SerializeField]
-        private TextMeshProUGUI equipmentCost1Text;
+        private TextMeshProUGUI cost1Text;
 
-        [TabGroup("Tab", "장비 가챠")]
         [SerializeField]
-        private TextMeshProUGUI equipmentCost11Text;
+        private TextMeshProUGUI cost11Text;
 
-        [TabGroup("Tab", "장비 가챠")]
         [SerializeField]
-        private TextMeshProUGUI equipmentCost55Text;
-
-        [TabGroup("Tab", "유물 가챠")]
-        [SerializeField]
-        private TextMeshProUGUI relicCost1Text;
-
-        [TabGroup("Tab", "유물 가챠")]
-        [SerializeField]
-        private TextMeshProUGUI relicCost10Text;
+        private TextMeshProUGUI cost55Text;
 
         [Title("천장 표시")]
         [SerializeField]
-        private Slider equipmentPitySlider;
+        private Slider pitySlider;
 
         [SerializeField]
-        private TextMeshProUGUI equipmentPityText;
-
-        [SerializeField]
-        private Slider relicPitySlider;
-
-        [SerializeField]
-        private TextMeshProUGUI relicPityText;
+        private TextMeshProUGUI pityText;
 
         [Title("팝업 설정")]
         [SerializeField]
@@ -109,7 +104,11 @@ namespace RPG.UI.Gacha
 
         [BoxGroup("Cost")]
         [SerializeField]
-        private int relicCost10 = 1800;
+        private int relicCost11 = 2000;
+
+        [BoxGroup("Cost")]
+        [SerializeField]
+        private int relicCost55 = 10000;
 
         [Title("애니메이션 설정")]
         [SerializeField]
@@ -133,11 +132,27 @@ namespace RPG.UI.Gacha
             // 버튼 이벤트 설정
             SetupButtons();
 
+            // UI 업데이트
+            UpdateUI();
+        }
+
+        private void OnGachaModeChanged()
+        {
+            UpdateUI();
+        }
+
+        private void OnEquipmentTypeChanged()
+        {
+            // 장비 타입 변경 시 처리할 내용이 있으면 여기에
+        }
+
+        private void UpdateUI()
+        {
             // 비용 텍스트 업데이트
             UpdateCostTexts();
 
             // 천장 표시 업데이트
-            UpdatePityDisplays();
+            UpdatePityDisplay();
         }
 
         private void FindRequiredSystems()
@@ -191,41 +206,28 @@ namespace RPG.UI.Gacha
 
         private void SetupButtons()
         {
-            // 장비 가챠 버튼
-            if (equipmentPull1Button != null)
+            // 1회 뽑기 버튼
+            if (pull1Button != null)
             {
-                equipmentPull1Button.onClick.RemoveAllListeners();
-                equipmentPull1Button.onClick.AddListener(() => OnEquipmentPull(1));
-                AddButtonAnimation(equipmentPull1Button);
+                pull1Button.onClick.RemoveAllListeners();
+                pull1Button.onClick.AddListener(() => OnPull(1));
+                AddButtonAnimation(pull1Button);
             }
 
-            if (equipmentPull11Button != null)
+            // 11회 뽑기 버튼
+            if (pull11Button != null)
             {
-                equipmentPull11Button.onClick.RemoveAllListeners();
-                equipmentPull11Button.onClick.AddListener(() => OnEquipmentPull(11));
-                AddButtonAnimation(equipmentPull11Button);
+                pull11Button.onClick.RemoveAllListeners();
+                pull11Button.onClick.AddListener(() => OnPull(11));
+                AddButtonAnimation(pull11Button);
             }
 
-            if (equipmentPull55Button != null)
+            // 55회 뽑기 버튼
+            if (pull55Button != null)
             {
-                equipmentPull55Button.onClick.RemoveAllListeners();
-                equipmentPull55Button.onClick.AddListener(() => OnEquipmentPull(55));
-                AddButtonAnimation(equipmentPull55Button);
-            }
-
-            // 유물 가챠 버튼
-            if (relicPull1Button != null)
-            {
-                relicPull1Button.onClick.RemoveAllListeners();
-                relicPull1Button.onClick.AddListener(() => OnRelicPull(1));
-                AddButtonAnimation(relicPull1Button);
-            }
-
-            if (relicPull10Button != null)
-            {
-                relicPull10Button.onClick.RemoveAllListeners();
-                relicPull10Button.onClick.AddListener(() => OnRelicPull(10));
-                AddButtonAnimation(relicPull10Button);
+                pull55Button.onClick.RemoveAllListeners();
+                pull55Button.onClick.AddListener(() => OnPull(55));
+                AddButtonAnimation(pull55Button);
             }
         }
 
@@ -242,6 +244,21 @@ namespace RPG.UI.Gacha
             {
                 pressEffect = button.gameObject.AddComponent<ButtonPressEffect>();
                 pressEffect.pressScale = buttonPressScale;
+            }
+        }
+
+        /// <summary>
+        /// 가챠 실행 (모드에 따라 분기)
+        /// </summary>
+        private void OnPull(int count)
+        {
+            if (currentGachaMode == GachaMode.Equipment)
+            {
+                OnEquipmentPull(count);
+            }
+            else
+            {
+                OnRelicPull(count);
             }
         }
 
@@ -274,25 +291,43 @@ namespace RPG.UI.Gacha
 
             // 가챠 실행
             List<EquipmentData> results = null;
-            switch (count)
+
+            if (useAllTypes)
             {
-                case 1:
-                    var single = equipmentGachaSystem.PullSingle();
-                    results = new List<EquipmentData> { single };
-                    break;
-                case 11:
-                    results = equipmentGachaSystem.Pull11();
-                    break;
-                case 55:
-                    results = equipmentGachaSystem.Pull55();
-                    break;
+                // 모든 타입 랜덤
+                switch (count)
+                {
+                    case 1:
+                        var single = equipmentGachaSystem.PullSingle();
+                        results = new List<EquipmentData> { single };
+                        break;
+                    case 11:
+                        results = equipmentGachaSystem.Pull11();
+                        break;
+                    case 55:
+                        results = equipmentGachaSystem.Pull55();
+                        break;
+                }
+            }
+            else
+            {
+                // 특정 타입만
+                results = new List<EquipmentData>();
+                for (int i = 0; i < count; i++)
+                {
+                    var equipment = equipmentGachaSystem.PullSingleByType(currentEquipmentType);
+                    if (equipment != null)
+                    {
+                        results.Add(equipment);
+                    }
+                }
             }
 
             // 결과 표시
             ShowEquipmentResults(results, count);
 
             // 천장 업데이트
-            UpdatePityDisplays();
+            UpdatePityDisplay();
         }
 
         /// <summary>
@@ -330,8 +365,43 @@ namespace RPG.UI.Gacha
                     var single = relicGachaSystem.PullSingle();
                     results = new List<RelicData> { single };
                     break;
-                case 10:
-                    results = relicGachaSystem.Pull10();
+                case 11:
+                    results = new List<RelicData>();
+                    // 10회 일반 뽑기
+                    for (int i = 0; i < 10; i++)
+                    {
+                        results.Add(relicGachaSystem.PullSingle());
+                    }
+                    // 11번째는 희귀 이상 보장
+                    bool hasRareOrBetter = results.Exists(r => r.rarity >= RelicRarity.Rare);
+                    if (!hasRareOrBetter)
+                    {
+                        // TODO: 희귀 이상 보장 로직 구현 필요
+                        results.Add(relicGachaSystem.PullSingle());
+                    }
+                    else
+                    {
+                        results.Add(relicGachaSystem.PullSingle());
+                    }
+                    break;
+                case 55:
+                    results = new List<RelicData>();
+                    // 54회 뽑기
+                    for (int i = 0; i < 54; i++)
+                    {
+                        results.Add(relicGachaSystem.PullSingle());
+                    }
+                    // 55번째는 영웅 이상 보장
+                    bool hasEpicOrBetter = results.Exists(r => r.rarity >= RelicRarity.Epic);
+                    if (!hasEpicOrBetter)
+                    {
+                        // TODO: 영웅 이상 보장 로직 구현 필요
+                        results.Add(relicGachaSystem.PullSingle());
+                    }
+                    else
+                    {
+                        results.Add(relicGachaSystem.PullSingle());
+                    }
                     break;
             }
 
@@ -339,7 +409,7 @@ namespace RPG.UI.Gacha
             ShowRelicResults(results, count);
 
             // 천장 업데이트
-            UpdatePityDisplays();
+            UpdatePityDisplay();
         }
 
         /// <summary>
@@ -367,11 +437,10 @@ namespace RPG.UI.Gacha
 
                         if (currentResultPopup != null)
                         {
-                            string title = GetPullTitle("장비", pullCount);
+                            // title 매개변수 제거됨
                             currentResultPopup.ShowEquipmentResults(
                                 results,
-                                title,
-                                onPullAgain: () => OnEquipmentPull(pullCount)
+                                () => OnEquipmentPull(pullCount)  // onPullAgain 콜백
                             );
                             Debug.Log("[GachaUIController] 장비 결과 표시 완료");
                         }
@@ -401,11 +470,10 @@ namespace RPG.UI.Gacha
 
                     if (currentResultPopup != null)
                     {
-                        string title = GetPullTitle("장비", pullCount);
+                        // title 매개변수 제거됨
                         currentResultPopup.ShowEquipmentResults(
                             results,
-                            title,
-                            onPullAgain: () => OnEquipmentPull(pullCount)
+                            () => OnEquipmentPull(pullCount)  // onPullAgain 콜백
                         );
 
                         currentResultPopup.Open(onClose: () =>
@@ -439,67 +507,78 @@ namespace RPG.UI.Gacha
                 return;
             }
 
-            // 결과 팝업 표시
-            if (gachaResultPopupPrefab != null)
+            // PopupManager 사용 가능한 경우
+            if (popupManager != null)
             {
-                Debug.Log($"[GachaUIController] 유물 가챠 결과 표시 시작 - 아이템 개수: {results.Count}");
+                Debug.Log("[GachaUIController] PopupManager로 유물 가챠 결과 팝업 표시");
 
-                // PopupManager 사용 가능한 경우
-                if (popupManager != null)
-                {
-                    // PopupManager의 컨테이너에 생성
-                    GameObject popupObj = Instantiate(gachaResultPopupPrefab, popupManager.popupContainer);
-                    currentResultPopup = popupObj.GetComponent<GachaResultPopup>();
-                }
-                else
-                {
-                    // PopupManager가 없으면 Canvas 찾아서 생성
-                    Canvas canvas = FindObjectOfType<Canvas>();
-                    if (canvas != null)
+                var popup = popupManager.Pop(
+                    PopupManager.PopupType.GachaResult,
+                    onOpen: () =>
                     {
-                        GameObject popupObj = Instantiate(gachaResultPopupPrefab, canvas.transform);
-                        currentResultPopup = popupObj.GetComponent<GachaResultPopup>();
-                        Debug.Log($"[GachaUIController] Canvas에 직접 팝업 생성: {canvas.name}");
-                    }
-                    else
-                    {
-                        Debug.LogError("[GachaUIController] Canvas를 찾을 수 없습니다!");
-                        isPulling = false;
-                        return;
-                    }
-                }
+                        // 생성된 팝업에서 GachaResultPopup 컴포넌트 찾기
+                        currentResultPopup = popupManager.popupContainer.GetComponentInChildren<GachaResultPopup>();
 
-                if (currentResultPopup != null)
-                {
-                    string title = GetPullTitle("유물", pullCount);
-
-                    // 결과 표시
-                    currentResultPopup.ShowRelicResults(
-                        results,
-                        title,
-                        onPullAgain: () => OnRelicPull(pullCount) // 다시 뽑기 콜백
-                    );
-
-                    // 팝업 열기
-                    currentResultPopup.Open(onClose: () =>
+                        if (currentResultPopup != null)
+                        {
+                            // title 매개변수 제거됨
+                            currentResultPopup.ShowRelicResults(
+                                results,
+                                () => OnRelicPull(pullCount)  // onPullAgain 콜백
+                            );
+                            Debug.Log("[GachaUIController] 유물 결과 표시 완료");
+                        }
+                        else
+                        {
+                            Debug.LogError("[GachaUIController] GachaResultPopup 컴포넌트를 찾을 수 없습니다!");
+                        }
+                    },
+                    onClose: () =>
                     {
                         isPulling = false;
                         currentResultPopup = null;
-                    });
+                        Debug.Log("[GachaUIController] 유물 가챠 결과 팝업 닫기 완료");
+                    }
+                );
+            }
+            else if (gachaResultPopupPrefab != null)
+            {
+                // PopupManager가 없으면 직접 생성
+                Debug.Log("[GachaUIController] 직접 유물 가챠 결과 팝업 생성");
 
-                    Debug.Log("[GachaUIController] 유물 가챠 팝업 열기 완료");
+                Canvas canvas = FindObjectOfType<Canvas>();
+                if (canvas != null)
+                {
+                    GameObject popupObj = Instantiate(gachaResultPopupPrefab, canvas.transform);
+                    currentResultPopup = popupObj.GetComponent<GachaResultPopup>();
+
+                    if (currentResultPopup != null)
+                    {
+                        // title 매개변수 제거됨
+                        currentResultPopup.ShowRelicResults(
+                            results,
+                            () => OnRelicPull(pullCount)  // onPullAgain 콜백
+                        );
+
+                        currentResultPopup.Open(onClose: () =>
+                        {
+                            isPulling = false;
+                            currentResultPopup = null;
+                        });
+                    }
                 }
                 else
                 {
-                    Debug.LogError("[GachaUIController] GachaResultPopup 컴포넌트를 찾을 수 없습니다!");
+                    Debug.LogError("[GachaUIController] Canvas를 찾을 수 없습니다!");
+                    isPulling = false;
                 }
+
             }
             else
             {
-                Debug.LogError("[GachaUIController] gachaResultPopupPrefab이 할당되지 않았습니다!");
+                Debug.LogError("[GachaUIController] 팝업을 표시할 방법이 없습니다!");
+                isPulling = false;
             }
-
-            isPulling = false;
         }
 
         /// <summary>
@@ -511,6 +590,20 @@ namespace RPG.UI.Gacha
                 return $"{type} 뽑기 결과";
             else
                 return $"{type} {count}연차 결과";
+        }
+
+        /// <summary>
+        /// 장비 타입 한글 변환
+        /// </summary>
+        private string GetEquipmentTypeKorean(EquipmentType type)
+        {
+            switch (type)
+            {
+                case EquipmentType.Weapon: return "무기";
+                case EquipmentType.Armor: return "방어구";
+                case EquipmentType.Ring: return "반지";
+                default: return type.ToString();
+            }
         }
 
         /// <summary>
@@ -543,7 +636,8 @@ namespace RPG.UI.Gacha
             switch (count)
             {
                 case 1: return relicCost1;
-                case 10: return relicCost10;
+                case 11: return relicCost11;
+                case 55: return relicCost55;
                 default: return 0;
             }
         }
@@ -553,60 +647,73 @@ namespace RPG.UI.Gacha
         /// </summary>
         private void UpdateCostTexts()
         {
-            // 장비 가챠 비용
-            if (equipmentCost1Text != null)
-                equipmentCost1Text.text = $"{equipmentCost1:N0}";
+            if (currentGachaMode == GachaMode.Equipment)
+            {
+                // 장비 가챠 비용
+                if (cost1Text != null)
+                    cost1Text.text = $"{equipmentCost1:N0}";
 
-            if (equipmentCost11Text != null)
-                equipmentCost11Text.text = $"{equipmentCost11:N0}";
+                if (cost11Text != null)
+                    cost11Text.text = $"{equipmentCost11:N0}";
 
-            if (equipmentCost55Text != null)
-                equipmentCost55Text.text = $"{equipmentCost55:N0}";
+                if (cost55Text != null)
+                    cost55Text.text = $"{equipmentCost55:N0}";
+            }
+            else
+            {
+                // 유물 가챠 비용
+                if (cost1Text != null)
+                    cost1Text.text = $"{relicCost1:N0}";
 
-            // 유물 가챠 비용
-            if (relicCost1Text != null)
-                relicCost1Text.text = $"{relicCost1:N0}";
+                if (cost11Text != null)
+                    cost11Text.text = $"{relicCost11:N0}";
 
-            if (relicCost10Text != null)
-                relicCost10Text.text = $"{relicCost10:N0}";
+                if (cost55Text != null)
+                    cost55Text.text = $"{relicCost55:N0}";
+            }
         }
 
         /// <summary>
         /// 천장 표시 업데이트
         /// </summary>
-        private void UpdatePityDisplays()
+        private void UpdatePityDisplay()
         {
-            // 장비 천장
-            if (equipmentGachaSystem != null)
+            if (currentGachaMode == GachaMode.Equipment)
             {
-                float equipmentPityProgress = equipmentGachaSystem.GetPityProgress();
-                int equipmentPityCount = equipmentGachaSystem.GetCurrentPityCount();
-
-                if (equipmentPitySlider != null)
+                // 장비 천장
+                if (equipmentGachaSystem != null)
                 {
-                    equipmentPitySlider.value = equipmentPityProgress;
-                }
+                    float pityProgress = equipmentGachaSystem.GetPityProgress();
+                    int pityCount = equipmentGachaSystem.GetCurrentPityCount();
 
-                if (equipmentPityText != null)
-                {
-                    equipmentPityText.text = $"{equipmentPityCount}/90";
+                    if (pitySlider != null)
+                    {
+                        pitySlider.value = pityProgress;
+                    }
+
+                    if (pityText != null)
+                    {
+                        pityText.text = $"{pityCount}/90";
+                    }
                 }
             }
-
-            // 유물 천장
-            if (relicGachaSystem != null)
+            else
             {
-                float relicPityProgress = relicGachaSystem.GetPityProgress();
-                int relicPityCount = relicGachaSystem.GetCurrentPityCount();
-
-                if (relicPitySlider != null)
+                // 유물 천장
+                if (relicGachaSystem != null)
                 {
-                    relicPitySlider.value = relicPityProgress;
-                }
+                    float pityProgress = relicGachaSystem.GetPityProgress();
+                    int pityCount = relicGachaSystem.GetCurrentPityCount();
 
-                if (relicPityText != null)
-                {
-                    relicPityText.text = $"{relicPityCount}/50";
+                    if (pitySlider != null)
+                    {
+                        pitySlider.value = pityProgress;
+                    }
+
+                    if (pityText != null)
+                    {
+                        pityText.text = $"{pityCount}/50";
+                    }
                 }
             }
         }
@@ -623,11 +730,9 @@ namespace RPG.UI.Gacha
         private void OnDestroy()
         {
             // 버튼 이벤트 해제
-            if (equipmentPull1Button != null) equipmentPull1Button.onClick.RemoveAllListeners();
-            if (equipmentPull11Button != null) equipmentPull11Button.onClick.RemoveAllListeners();
-            if (equipmentPull55Button != null) equipmentPull55Button.onClick.RemoveAllListeners();
-            if (relicPull1Button != null) relicPull1Button.onClick.RemoveAllListeners();
-            if (relicPull10Button != null) relicPull10Button.onClick.RemoveAllListeners();
+            if (pull1Button != null) pull1Button.onClick.RemoveAllListeners();
+            if (pull11Button != null) pull11Button.onClick.RemoveAllListeners();
+            if (pull55Button != null) pull55Button.onClick.RemoveAllListeners();
         }
 
         [Title("디버그")]
@@ -638,51 +743,45 @@ namespace RPG.UI.Gacha
             FindRequiredSystems();
         }
 
-        [Button("장비 1회 뽑기 테스트", ButtonSizes.Large)]
-        private void TestEquipment1Pull()
+        [Title("가챠 모드 전환")]
+        [ButtonGroup("ModeSwitch")]
+        [Button("장비 가챠", ButtonSizes.Large)]
+        [GUIColor(0.5f, 0.5f, 1f)]
+        private void SwitchToEquipment()
+        {
+            currentGachaMode = GachaMode.Equipment;
+            UpdateUI();
+        }
+
+        [ButtonGroup("ModeSwitch")]
+        [Button("유물 가챠", ButtonSizes.Large)]
+        [GUIColor(1f, 0.5f, 0.5f)]
+        private void SwitchToRelic()
+        {
+            currentGachaMode = GachaMode.Relic;
+            UpdateUI();
+        }
+
+        [Title("가챠 테스트")]
+        [Button("1회 뽑기 테스트", ButtonSizes.Large)]
+        private void Test1Pull()
         {
             if (!Application.isPlaying) return;
-            OnEquipmentPull(1);
+            OnPull(1);
         }
 
-        [Button("장비 11회 뽑기 테스트", ButtonSizes.Large)]
-        private void TestEquipment11Pull()
+        [Button("11회 뽑기 테스트", ButtonSizes.Large)]
+        private void Test11Pull()
         {
             if (!Application.isPlaying) return;
-            OnEquipmentPull(11);
+            OnPull(11);
         }
 
-        [Button("유물 10회 뽑기 테스트", ButtonSizes.Large)]
-        private void TestRelic10Pull()
+        [Button("55회 뽑기 테스트", ButtonSizes.Large)]
+        private void Test55Pull()
         {
             if (!Application.isPlaying) return;
-            OnRelicPull(10);
-        }
-    }
-
-    /// <summary>
-    /// 버튼 클릭 애니메이션 컴포넌트
-    /// </summary>
-    public class ButtonPressEffect : MonoBehaviour, UnityEngine.EventSystems.IPointerDownHandler, UnityEngine.EventSystems.IPointerUpHandler
-    {
-        public float pressScale = 0.95f;
-        public float duration = 0.1f;
-
-        private Vector3 originalScale;
-
-        private void Awake()
-        {
-            originalScale = transform.localScale;
-        }
-
-        public void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData)
-        {
-            transform.DOScale(originalScale * pressScale, duration).SetEase(Ease.OutQuad);
-        }
-
-        public void OnPointerUp(UnityEngine.EventSystems.PointerEventData eventData)
-        {
-            transform.DOScale(originalScale, duration).SetEase(Ease.OutBack);
+            OnPull(55);
         }
     }
 }

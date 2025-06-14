@@ -255,7 +255,7 @@ namespace RPG.UI.Enhancement
             {
                 if (currentMode != EnhancementUI.EnhanceMode.x1 && possibleEnhanceCount > 0)
                 {
-                    costText.text = $"{cost:N0} ({possibleEnhanceCount}x)";
+                    costText.text = $"{cost:N0}";
                 }
                 else
                 {

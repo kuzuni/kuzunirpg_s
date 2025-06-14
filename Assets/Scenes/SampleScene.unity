@@ -404,7 +404,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1200775302955350810, guid: 49a939c3dc9a1c346bb606fcabefb5fe, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000061035156
+      value: -0.00008392334
       objectReference: {fileID: 0}
     - target: {fileID: 2550657331341226829, guid: 49a939c3dc9a1c346bb606fcabefb5fe, type: 3}
       propertyPath: m_IsActive
@@ -3251,6 +3251,8 @@ MonoBehaviour:
     prefab: {fileID: 2676753618609063419, guid: 512c3da0f7459da41bb5de44f90f88e6, type: 3}
   - type: 15
     prefab: {fileID: 0}
+  - type: 16
+    prefab: {fileID: 6989963509958790242, guid: 0cdc61b642609b74aa67944981610fea, type: 3}
   testPopupType: 4
 --- !u!4 &618255857
 Transform:

@@ -15,7 +15,7 @@ MonoBehaviour:
   relicName: "\uC720\uBB3C"
   rarity: 2
   relicType: 0
-  icon: {fileID: 0}
+  icon: {fileID: 5137113478042750743, guid: 900029975db1ffe48872b9899f71b6d3, type: 3}
   statBonuses:
   - statType: 1
     bonusValue: 10

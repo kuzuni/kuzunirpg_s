@@ -16,7 +16,7 @@ MonoBehaviour:
   rarity: 2
   subGrade: 4
   equipmentType: 0
-  icon: {fileID: 0}
+  icon: {fileID: -2071114948389011391, guid: 22ebcd35414c91a4f8ed98d6b0d485c1, type: 3}
   attackPowerBonus: 28
   maxHpBonus: 140
   hpRegenBonus: 0

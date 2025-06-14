@@ -24,8 +24,7 @@ namespace RPG.UI.Gacha
         [SerializeField, Required]
         private GameObject resultItemPrefab;
 
-        [SerializeField]
-        private TextMeshProUGUI titleText;
+        // titleText 제거됨
 
         [SerializeField]
         private Button confirmButton;
@@ -102,17 +101,13 @@ namespace RPG.UI.Gacha
         /// <summary>
         /// 장비 가챠 결과 표시
         /// </summary>
-        public void ShowEquipmentResults(List<EquipmentData> results, string title = "장비 뽑기 결과", Action onPullAgain = null)
+        public void ShowEquipmentResults(List<EquipmentData> results, Action onPullAgain = null)
         {
             if (results == null || results.Count == 0) return;
 
             ClearPreviousResults();
 
-            // 제목 설정
-            if (titleText != null)
-            {
-                titleText.text = title;
-            }
+            // titleText 설정 제거됨
 
             onPullAgainCallback = onPullAgain;
             isShowingResults = true;
@@ -132,17 +127,13 @@ namespace RPG.UI.Gacha
         /// <summary>
         /// 유물 가챠 결과 표시
         /// </summary>
-        public void ShowRelicResults(List<RelicData> results, string title = "유물 뽑기 결과", Action onPullAgain = null)
+        public void ShowRelicResults(List<RelicData> results, Action onPullAgain = null)
         {
             if (results == null || results.Count == 0) return;
 
             ClearPreviousResults();
 
-            // 제목 설정
-            if (titleText != null)
-            {
-                titleText.text = title;
-            }
+            // titleText 설정 제거됨
 
             onPullAgainCallback = onPullAgain;
             isShowingResults = true;
@@ -505,7 +496,7 @@ namespace RPG.UI.Gacha
             var testResults = new List<EquipmentData>();
             // 실제로는 Resources에서 로드하거나 생성해야 함
 
-            ShowEquipmentResults(testResults, "테스트 장비 뽑기");
+            ShowEquipmentResults(testResults);
         }
     }
 }

@@ -28,13 +28,7 @@ namespace RPG.UI.Gacha
         private Image glowEffect;
 
         [SerializeField, Required]
-        private TextMeshProUGUI itemNameText;
-
-        [SerializeField]
-        private TextMeshProUGUI itemTypeText;
-
-        [SerializeField]
-        private TextMeshProUGUI subGradeText; // 장비 세부 등급용
+        private TextMeshProUGUI subGradeText; // 등급 + 세부등급 표시용
 
         [SerializeField]
         private GameObject newBadge;
@@ -75,6 +69,12 @@ namespace RPG.UI.Gacha
             // 초기 상태 숨김
             canvasGroup.alpha = 0;
             transform.localScale = Vector3.zero;
+
+            // 아이콘 초기화
+            if (itemIcon != null)
+            {
+                itemIcon.preserveAspect = true; // 아이콘 비율 유지
+            }
         }
 
         /// <summary>
@@ -82,33 +82,42 @@ namespace RPG.UI.Gacha
         /// </summary>
         public void SetupEquipment(EquipmentData equipment, int index = 0)
         {
-            if (equipment == null) return;
+            if (equipment == null)
+            {
+                Debug.LogError("[GachaResultItem] equipment이 null입니다!");
+                return;
+            }
 
             currentItem = equipment;
 
             // 아이콘 설정
-            if (itemIcon != null && equipment.icon != null)
+            if (itemIcon != null)
             {
-                itemIcon.sprite = equipment.icon;
+                if (equipment.icon != null)
+                {
+                    itemIcon.sprite = equipment.icon;
+                    itemIcon.enabled = true;
+                    itemIcon.color = Color.white;
+                    Debug.Log($"[GachaResultItem] 아이콘 설정 완료: {equipment.equipmentName}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[GachaResultItem] {equipment.equipmentName}의 아이콘이 없습니다!");
+                    itemIcon.enabled = false;
+                }
+            }
+            else
+            {
+                Debug.LogError("[GachaResultItem] itemIcon UI 컴포넌트가 할당되지 않았습니다!");
             }
 
-            // 이름 설정
-            if (itemNameText != null)
-            {
-                itemNameText.text = equipment.equipmentName;
-                itemNameText.color = equipment.GetRarityColor();
-            }
-
-            // 타입 텍스트
-            if (itemTypeText != null)
-            {
-                itemTypeText.text = GetEquipmentTypeText(equipment.equipmentType);
-            }
-
-            // 세부 등급 표시
+            // 등급 + 세부등급 표시
             if (subGradeText != null)
             {
-                subGradeText.text = $"{equipment.subGrade}★";
+                // "영웅 3★" 형식으로 표시
+                string rarityName = RarityColors.GetRarityName(equipment.rarity);
+                subGradeText.text = $"{rarityName} {equipment.subGrade}★";
+                subGradeText.color = equipment.GetRarityColor();
                 subGradeText.gameObject.SetActive(true);
             }
 
@@ -124,33 +133,42 @@ namespace RPG.UI.Gacha
         /// </summary>
         public void SetupRelic(RelicData relic, int index = 0)
         {
-            if (relic == null) return;
+            if (relic == null)
+            {
+                Debug.LogError("[GachaResultItem] relic이 null입니다!");
+                return;
+            }
 
             currentItem = relic;
 
             // 아이콘 설정
-            if (itemIcon != null && relic.icon != null)
+            if (itemIcon != null)
             {
-                itemIcon.sprite = relic.icon;
+                if (relic.icon != null)
+                {
+                    itemIcon.sprite = relic.icon;
+                    itemIcon.enabled = true;
+                    itemIcon.color = Color.white;
+                    Debug.Log($"[GachaResultItem] 아이콘 설정 완료: {relic.relicName}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[GachaResultItem] {relic.relicName}의 아이콘이 없습니다!");
+                    itemIcon.enabled = false;
+                }
+            }
+            else
+            {
+                Debug.LogError("[GachaResultItem] itemIcon UI 컴포넌트가 할당되지 않았습니다!");
             }
 
-            // 이름 설정
-            if (itemNameText != null)
-            {
-                itemNameText.text = relic.relicName;
-                itemNameText.color = relic.GetRarityColor();
-            }
-
-            // 타입 텍스트
-            if (itemTypeText != null)
-            {
-                itemTypeText.text = GetRelicTypeText(relic.relicType);
-            }
-
-            // 유물은 세부 등급 없음
+            // 유물은 등급만 표시 (세부 등급 없음)
             if (subGradeText != null)
             {
-                subGradeText.gameObject.SetActive(false);
+                string rarityName = RelicRarityColors.GetRarityName(relic.rarity);
+                subGradeText.text = rarityName;
+                subGradeText.color = relic.GetRarityColor();
+                subGradeText.gameObject.SetActive(true);
             }
 
             // 등급별 프레임 색상
@@ -255,6 +273,7 @@ namespace RPG.UI.Gacha
             }
         }
 
+
         /// <summary>
         /// 아이템 클릭 시 상세 정보 표시
         /// </summary>
@@ -268,28 +287,6 @@ namespace RPG.UI.Gacha
 
             // TODO: 아이템 상세 정보 팝업 표시
             Debug.Log($"아이템 클릭: {currentItem.ItemName}");
-        }
-
-        private string GetEquipmentTypeText(EquipmentType type)
-        {
-            switch (type)
-            {
-                case EquipmentType.Weapon: return "무기";
-                case EquipmentType.Armor: return "방어구";
-                case EquipmentType.Ring: return "반지";
-                default: return type.ToString();
-            }
-        }
-
-        private string GetRelicTypeText(RelicType type)
-        {
-            switch (type)
-            {
-                case RelicType.Offensive: return "공격형";
-                case RelicType.Defensive: return "방어형";
-                case RelicType.Balanced: return "균형형";
-                default: return type.ToString();
-            }
         }
 
         private void OnDestroy()

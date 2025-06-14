@@ -6,9 +6,9 @@ using System;
 using DG.Tweening;
 using RPG.UI.Popup;
 using RPG.UI.Components;
+
 namespace RPG.UI.Popup
 {
-
     public class PopupToggleButton : SerializedMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
         [Title("팝업 타입 설정")]
@@ -78,6 +78,9 @@ namespace RPG.UI.Popup
         private bool isHovering = false;
         private bool isPressed = false;
         private Sequence currentSequence;
+
+        // 스케일 애니메이션 관리를 위한 Tweener
+        private Tweener scaleTweener;
 
         private void Awake()
         {
@@ -255,10 +258,23 @@ namespace RPG.UI.Popup
 
             // 진행 중인 애니메이션 정리
             currentSequence?.Kill();
+            scaleTweener?.Kill();
             transform.DOKill();
         }
 
         #region DoTween 애니메이션
+
+        /// <summary>
+        /// 안전한 스케일 애니메이션 실행
+        /// </summary>
+        private void AnimateScale(Vector3 targetScale, float duration, Ease ease)
+        {
+            // 기존 스케일 애니메이션 중단
+            scaleTweener?.Kill(true);
+
+            // 새로운 스케일 애니메이션 시작
+            scaleTweener = transform.DOScale(targetScale, duration).SetEase(ease);
+        }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
@@ -267,7 +283,7 @@ namespace RPG.UI.Popup
             isHovering = true;
             if (!isPressed)
             {
-                transform.DOScale(originalScale * hoverScale, hoverDuration).SetEase(hoverEase);
+                AnimateScale(originalScale * hoverScale, hoverDuration, hoverEase);
             }
         }
 
@@ -276,7 +292,7 @@ namespace RPG.UI.Popup
             isHovering = false;
             if (!isPressed)
             {
-                transform.DOScale(originalScale, hoverDuration).SetEase(hoverEase);
+                AnimateScale(originalScale, hoverDuration, hoverEase);
             }
         }
 
@@ -285,14 +301,14 @@ namespace RPG.UI.Popup
             if (!button.interactable) return;
 
             isPressed = true;
-            transform.DOScale(originalScale * clickScale, clickDuration).SetEase(clickEase);
+            AnimateScale(originalScale * clickScale, clickDuration, clickEase);
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             isPressed = false;
             float targetScale = isHovering ? hoverScale : 1f;
-            transform.DOScale(originalScale * targetScale, clickDuration).SetEase(clickEase);
+            AnimateScale(originalScale * targetScale, clickDuration, clickEase);
         }
 
         private void PlayPopupOpenAnimation()
@@ -310,9 +326,14 @@ namespace RPG.UI.Popup
                 );
             }
 
-            // 버튼 전체 펄스 효과
+            // 버튼 전체 펄스 효과 (스케일 애니메이션과 충돌하지 않도록 수정)
+            // DOPunchScale 대신 현재 스케일을 기준으로 애니메이션
+            Vector3 currentScale = transform.localScale;
             currentSequence.Join(
-                transform.DOPunchScale(originalScale * 0.1f, popupOpenDuration, 10, 1f)
+                DOTween.Sequence()
+                    .Append(transform.DOScale(currentScale * 1.1f, popupOpenDuration * 0.3f))
+                    .Append(transform.DOScale(currentScale, popupOpenDuration * 0.7f))
+                    .SetEase(Ease.OutElastic)
             );
         }
 
@@ -373,6 +394,10 @@ namespace RPG.UI.Popup
             SetButtonState(false);
             isPopupOpen = false;
             currentPopup = null;
+
+            // 스케일도 원래대로 초기화
+            scaleTweener?.Kill();
+            transform.localScale = originalScale;
         }
     }
 }
