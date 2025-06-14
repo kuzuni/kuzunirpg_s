@@ -404,7 +404,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1200775302955350810, guid: 49a939c3dc9a1c346bb606fcabefb5fe, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000061035156
+      value: -0.00018310547
       objectReference: {fileID: 0}
     - target: {fileID: 2550657331341226829, guid: 49a939c3dc9a1c346bb606fcabefb5fe, type: 3}
       propertyPath: m_IsActive
@@ -3251,6 +3251,10 @@ MonoBehaviour:
     prefab: {fileID: 2676753618609063419, guid: 512c3da0f7459da41bb5de44f90f88e6, type: 3}
   - type: 15
     prefab: {fileID: 0}
+  - type: 16
+    prefab: {fileID: 6989963509958790242, guid: 0cdc61b642609b74aa67944981610fea, type: 3}
+  - type: 17
+    prefab: {fileID: 4731086160884241036, guid: 27f7b20f245862d4d9c3722347cdc06c, type: 3}
   testPopupType: 4
 --- !u!4 &618255857
 Transform:
@@ -10811,6 +10815,9 @@ GameObject:
   - component: {fileID: 1753729774}
   - component: {fileID: 1753729775}
   - component: {fileID: 1753729776}
+  - component: {fileID: 1753729779}
+  - component: {fileID: 1753729778}
+  - component: {fileID: 1753729777}
   m_Layer: 0
   m_Name: Gacha
   m_TagString: Untagged
@@ -10890,6 +10897,47 @@ MonoBehaviour:
   enable10PullGuarantee: 1
   relicInventory: {fileID: 0}
   autoAddToInventory: 1
+--- !u!114 &1753729777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1753729772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3e50754513916d4cb1dc20c0b1fe44e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1753729778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1753729772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b929d23cf1a0d944b02cb03df2650be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gachaSystem: {fileID: 0}
+  cost1Pull: 100
+  cost11Pull: 1000
+  cost55Pull: 4500
+--- !u!114 &1753729779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1753729772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 977868f54e8b4f849a1deddad275a1d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  popupManager: {fileID: 618255856}
 --- !u!1 &1768371389
 GameObject:
   m_ObjectHideFlags: 0

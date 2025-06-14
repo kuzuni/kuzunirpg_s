@@ -3,9 +3,9 @@ using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+
 namespace RPG.UI.Popup
 {
-
     public class PopupManager : SerializedMonoBehaviour
     {
         [Title("팝업 타입")]
@@ -26,7 +26,9 @@ namespace RPG.UI.Popup
             Attendance,
             Equipment,
             Pet,
-            Adventure
+            Adventure,
+            Gacha,          // 추가
+            GachaResult     // 추가
         }
 
         [Title("컨테이너 설정")]
@@ -39,22 +41,24 @@ namespace RPG.UI.Popup
         [SerializeField]
         private PopupPrefabEntry[] popupEntries = new PopupPrefabEntry[]
         {
-        new PopupPrefabEntry { type = PopupType.Game_Base },
-        new PopupPrefabEntry { type = PopupType.Game_Exit },
-        new PopupPrefabEntry { type = PopupType.Loading },
-        new PopupPrefabEntry { type = PopupType.Mission },
-        new PopupPrefabEntry { type = PopupType.MyInfo },
-        new PopupPrefabEntry { type = PopupType.Options },
-        new PopupPrefabEntry { type = PopupType.Notice },
-        new PopupPrefabEntry { type = PopupType.Ranking },
-        new PopupPrefabEntry { type = PopupType.Success },
-        new PopupPrefabEntry { type = PopupType.Team_Message },
-        new PopupPrefabEntry { type = PopupType.Gamble },
-        new PopupPrefabEntry { type = PopupType.Shop },
-        new PopupPrefabEntry { type = PopupType.Attendance },
-        new PopupPrefabEntry { type = PopupType.Equipment },
-        new PopupPrefabEntry { type = PopupType.Pet },
-        new PopupPrefabEntry { type = PopupType.Adventure }
+            new PopupPrefabEntry { type = PopupType.Game_Base },
+            new PopupPrefabEntry { type = PopupType.Game_Exit },
+            new PopupPrefabEntry { type = PopupType.Loading },
+            new PopupPrefabEntry { type = PopupType.Mission },
+            new PopupPrefabEntry { type = PopupType.MyInfo },
+            new PopupPrefabEntry { type = PopupType.Options },
+            new PopupPrefabEntry { type = PopupType.Notice },
+            new PopupPrefabEntry { type = PopupType.Ranking },
+            new PopupPrefabEntry { type = PopupType.Success },
+            new PopupPrefabEntry { type = PopupType.Team_Message },
+            new PopupPrefabEntry { type = PopupType.Gamble },
+            new PopupPrefabEntry { type = PopupType.Shop },
+            new PopupPrefabEntry { type = PopupType.Attendance },
+            new PopupPrefabEntry { type = PopupType.Equipment },
+            new PopupPrefabEntry { type = PopupType.Pet },
+            new PopupPrefabEntry { type = PopupType.Adventure },
+            new PopupPrefabEntry { type = PopupType.Gacha },
+            new PopupPrefabEntry { type = PopupType.GachaResult }
         };
 
         [System.Serializable]
@@ -79,22 +83,24 @@ namespace RPG.UI.Popup
             var oldEntries = popupEntries;
             popupEntries = new PopupPrefabEntry[]
             {
-            new PopupPrefabEntry { type = PopupType.Game_Base },
-            new PopupPrefabEntry { type = PopupType.Game_Exit },
-            new PopupPrefabEntry { type = PopupType.Loading },
-            new PopupPrefabEntry { type = PopupType.Mission },
-            new PopupPrefabEntry { type = PopupType.MyInfo },
-            new PopupPrefabEntry { type = PopupType.Options },
-            new PopupPrefabEntry { type = PopupType.Notice },
-            new PopupPrefabEntry { type = PopupType.Ranking },
-            new PopupPrefabEntry { type = PopupType.Success },
-            new PopupPrefabEntry { type = PopupType.Team_Message },
-            new PopupPrefabEntry { type = PopupType.Gamble },
-            new PopupPrefabEntry { type = PopupType.Shop },
-            new PopupPrefabEntry { type = PopupType.Attendance },
-            new PopupPrefabEntry { type = PopupType.Equipment },
-            new PopupPrefabEntry { type = PopupType.Pet },
-            new PopupPrefabEntry { type = PopupType.Adventure }
+                new PopupPrefabEntry { type = PopupType.Game_Base },
+                new PopupPrefabEntry { type = PopupType.Game_Exit },
+                new PopupPrefabEntry { type = PopupType.Loading },
+                new PopupPrefabEntry { type = PopupType.Mission },
+                new PopupPrefabEntry { type = PopupType.MyInfo },
+                new PopupPrefabEntry { type = PopupType.Options },
+                new PopupPrefabEntry { type = PopupType.Notice },
+                new PopupPrefabEntry { type = PopupType.Ranking },
+                new PopupPrefabEntry { type = PopupType.Success },
+                new PopupPrefabEntry { type = PopupType.Team_Message },
+                new PopupPrefabEntry { type = PopupType.Gamble },
+                new PopupPrefabEntry { type = PopupType.Shop },
+                new PopupPrefabEntry { type = PopupType.Attendance },
+                new PopupPrefabEntry { type = PopupType.Equipment },
+                new PopupPrefabEntry { type = PopupType.Pet },
+                new PopupPrefabEntry { type = PopupType.Adventure },
+                new PopupPrefabEntry { type = PopupType.Gacha },
+                new PopupPrefabEntry { type = PopupType.GachaResult }
             };
 
             // 기존 프리팹 복사
@@ -303,6 +309,8 @@ namespace RPG.UI.Popup
         public void PopEquipment() => Pop(PopupType.Equipment);
         public void PopPet() => Pop(PopupType.Pet);
         public void PopAdventure() => Pop(PopupType.Adventure);
+        public void PopGacha() => Pop(PopupType.Gacha);
+        public void PopGachaResult() => Pop(PopupType.GachaResult);
 
         #endregion
     }

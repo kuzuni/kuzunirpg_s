@@ -285,7 +285,7 @@ GameObject:
   - component: {fileID: 4232852508947910763}
   - component: {fileID: 3781494442215010975}
   m_Layer: 0
-  m_Name: List_LvCan
+  m_Name: EnhanceMentSlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
