@@ -63,7 +63,50 @@ namespace RPG.Inventory
                 return result;
             }
         }
+        public override bool AddItem(EquipmentData item, int quantity = 1)
+        {
+            if (item == null || quantity <= 0) return false;
 
+            Debug.Log($"[EquipmentInventorySystem.AddItem] 시작");
+            Debug.Log($"  - 아이템: {item.GetFullRarityName()} {item.equipmentName}");
+            Debug.Log($"  - 인스턴스 ID: {item.GetInstanceID()}");
+            Debug.Log($"  - 추가할 수량: {quantity}");
+
+            // 같은 아이템이 있는지 확인
+            var existingSlot = inventory.FirstOrDefault(slot =>
+                GetItemFromSlot(slot) != null && IsSameItem(GetItemFromSlot(slot), item));
+
+            if (existingSlot != null)
+            {
+                var existingItem = GetItemFromSlot(existingSlot);
+                Debug.Log($"[기존 슬롯 발견]");
+                Debug.Log($"  - 기존 아이템: {existingItem.GetFullRarityName()} {existingItem.equipmentName}");
+                Debug.Log($"  - 기존 인스턴스 ID: {existingItem.GetInstanceID()}");
+                Debug.Log($"  - 현재 수량: {GetSlotQuantity(existingSlot)}");
+
+                // 기존 슬롯에 수량 추가
+                SetSlotQuantity(existingSlot, GetSlotQuantity(existingSlot) + quantity);
+
+                Debug.Log($"  - 업데이트된 수량: {GetSlotQuantity(existingSlot)}");
+            }
+            else
+            {
+                Debug.Log($"[새 슬롯 생성]");
+                // 새 슬롯 생성
+                inventory.Add(CreateNewSlot(item, quantity));
+            }
+
+            // 로컬 이벤트 발생 (BaseInventorySystem의 이벤트 발생 코드를 그대로 사용)
+            // OnItemAdded?.Invoke(item, quantity); // 이 부분은 protected 이벤트라 직접 호출 불가
+
+            // GameEventManager로 전파
+            TriggerGlobalItemEvent(item, true);
+
+            // 로그
+            LogItemAdded(item, quantity);
+
+            return true;
+        }
         // BaseInventorySystem 추상 메서드 구현
         protected override EquipmentData GetItemFromSlot(InventorySlot<EquipmentData> slot)
         {
@@ -94,8 +137,10 @@ namespace RPG.Inventory
 
         protected override bool IsSameItem(EquipmentData item1, EquipmentData item2)
         {
-            // 같은 장비인지 확인 (이름과 세부등급이 같으면 스택 가능)
-            return item1.name == item2.name && item1.subGrade == item2.subGrade;
+            // 장비 이름과 세부등급이 모두 같을 때만 같은 아이템으로 처리
+            return item1.equipmentName == item2.equipmentName &&
+                   item1.subGrade == item2.subGrade &&
+                   item1.rarity == item2.rarity;  // 등급도 추가로 확인
         }
 
         public override int GetTotalItemCount()
