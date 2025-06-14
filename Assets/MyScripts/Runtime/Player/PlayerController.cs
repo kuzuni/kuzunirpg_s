@@ -13,14 +13,14 @@ namespace RPG.Player
         private HealthSystem healthSystem;
         private HealthRegenerationSystem regenSystem;
         private AttackSystem attackSystem;
-        private EnhancementSystem enhancementSystem;
+        private PlayerEnhancementSystem enhancementSystem;
         private EquipmentSystem equipmentSystem;
         private RelicEffectSystem relicEffectSystem;
 
         public PlayerStatus Status => playerStatus;
         public HealthSystem Health => healthSystem;
         public AttackSystem Attack => attackSystem;
-        public EnhancementSystem Enhancement => enhancementSystem;
+        public PlayerEnhancementSystem Enhancement => enhancementSystem;
         public EquipmentSystem Equipment => equipmentSystem;
         public RelicEffectSystem RelicEffect => relicEffectSystem;
 
@@ -30,7 +30,7 @@ namespace RPG.Player
             healthSystem = gameObject.AddComponent<HealthSystem>();
             regenSystem = gameObject.AddComponent<HealthRegenerationSystem>();
             attackSystem = gameObject.AddComponent<AttackSystem>();
-            enhancementSystem = gameObject.AddComponent<EnhancementSystem>();
+            enhancementSystem = gameObject.AddComponent<PlayerEnhancementSystem>();
             equipmentSystem = gameObject.AddComponent<EquipmentSystem>();
             relicEffectSystem = gameObject.AddComponent<RelicEffectSystem>();
 

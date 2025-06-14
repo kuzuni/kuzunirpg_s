@@ -77,7 +77,7 @@ namespace RPG.UI.Enhancement
         private EnhanceMode currentMode = EnhanceMode.x1;
 
         // 시스템 참조
-        private EnhancementSystem enhancementSystem;
+        private PlayerEnhancementSystem enhancementSystem;
         private PlayerController playerController;
         private CurrencyManager currencyManager;
 

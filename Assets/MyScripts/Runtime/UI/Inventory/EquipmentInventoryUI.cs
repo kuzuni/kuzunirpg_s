@@ -338,7 +338,8 @@ namespace RPG.UI.Inventory
             // 현재 탭의 모든 장비 가져오기 (Resources)
             if (!allEquipmentCache.ContainsKey(currentTab))
             {
-                Debug.LogError($"[RefreshInventory] {currentTab} 탭의 장비가 캐시에 없습니다!");
+
+               Debug.LogWarning($"[RefreshInventory] {currentTab} 탭의 장비가 캐시에 없습니다!");
                 return;
             }
 

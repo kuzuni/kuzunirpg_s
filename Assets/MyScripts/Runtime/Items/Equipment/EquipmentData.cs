@@ -4,7 +4,6 @@ using RPG.Gacha.Base;
 
 namespace RPG.Items.Equipment
 {
-
     [CreateAssetMenu(fileName = "New Equipment", menuName = "RPG/Equipment")]
     public class EquipmentData : ScriptableObject, IGachaItem
     {
@@ -27,6 +26,19 @@ namespace RPG.Items.Equipment
         [SuffixLabel("성", true)]
         [DelayedProperty]
         public int subGrade = 1;
+
+        [VerticalGroup("BasicInfo/Left")]
+        [HorizontalGroup("BasicInfo/Left/Level")]
+        [LabelText("레벨")]
+        [PropertyRange(1, 100)]
+        [SuffixLabel("Lv", true)]
+        [DelayedProperty]
+        public int level = 1;
+
+        [HorizontalGroup("BasicInfo/Left/Level", Width = 150)]
+        [ShowInInspector, ReadOnly]
+        [LabelText("강화 보너스")]
+        private string LevelBonus => $"+{GetLevelBonus() * 100f:F0}%";
 
         [VerticalGroup("BasicInfo/Left")]
         [LabelText("장비 타입")]
@@ -56,23 +68,28 @@ namespace RPG.Items.Equipment
         [SuffixLabel("HP/초", true)]
         public float hpRegenBonus;
 
-        [Title("등급 정보")]
-        [InfoBox("$GetGradeInfo", InfoMessageType.Info)]
+        [Title("레벨 및 등급 정보")]
+        [InfoBox("$GetFullInfo", InfoMessageType.Info)]
         [ShowInInspector, ReadOnly]
-        [ProgressBar(0, 100, ColorGetter = "GetRarityColor", Height = 30)]
-        [LabelText("총 등급 보너스")]
-        private float TotalRarityBonusPercent => (GetRarityBonus() + GetSubGradeBonus()) * 100f;
+        [ProgressBar(0, 100, ColorGetter = "GetProgressBarColor", Height = 30)]
+        [LabelText("총 성장도")]
+        private float TotalGrowthPercent => (GetRarityBonus() + GetSubGradeBonus() + GetLevelBonus()) * 100f;
 
-        [HorizontalGroup("GradeBonus", 0.5f)]
+        [HorizontalGroup("BonusInfo", 0.33f)]
         [ShowInInspector, ReadOnly]
-        [VerticalGroup("GradeBonus/Left")]
-        [LabelText("기본 등급 보너스")]
+        [VerticalGroup("BonusInfo/Rarity")]
+        [LabelText("등급 보너스")]
         private string BaseRarityBonus => $"+{GetRarityBonus() * 100f:F0}%";
 
         [ShowInInspector, ReadOnly]
-        [VerticalGroup("GradeBonus/Right")]
-        [LabelText("세부 등급 보너스")]
-        private string SubGradeBonus => $"+{GetSubGradeBonus() * 100f:F1}%";
+        [VerticalGroup("BonusInfo/SubGrade")]
+        [LabelText("세부등급 보너스")]
+        private string SubGradeBonusText => $"+{GetSubGradeBonus() * 100f:F1}%";
+
+        [ShowInInspector, ReadOnly]
+        [VerticalGroup("BonusInfo/Level")]
+        [LabelText("레벨 보너스")]
+        private string LevelBonusText => $"+{GetLevelBonus() * 100f:F0}%";
 
         [Title("추가 정보")]
         [TextArea(3, 5)]
@@ -176,38 +193,54 @@ namespace RPG.Items.Equipment
             return (subGrade - 1) * 0.03f;
         }
 
-        // 전체 등급 보너스
-        public float GetTotalGradeBonus()
+        // 레벨 보너스 (레벨당 1% 추가)
+        public float GetLevelBonus()
         {
-            return GetRarityBonus() + GetSubGradeBonus();
+            return (level - 1) * 0.01f;
         }
 
-        // 최종 스탯 계산 (기본값 + 전체 등급 보너스)
+        // 전체 보너스 (등급 + 세부등급 + 레벨)
+        public float GetTotalBonus()
+        {
+            return GetRarityBonus() + GetSubGradeBonus() + GetLevelBonus();
+        }
+
+        // 최종 스탯 계산 (기본값 + 전체 보너스)
         public int GetFinalAttackPower()
         {
-            return Mathf.RoundToInt(attackPowerBonus * (1 + GetTotalGradeBonus()));
+            return Mathf.RoundToInt(attackPowerBonus * (1 + GetTotalBonus()));
         }
 
         public int GetFinalMaxHp()
         {
-            return Mathf.RoundToInt(maxHpBonus * (1 + GetTotalGradeBonus()));
+            return Mathf.RoundToInt(maxHpBonus * (1 + GetTotalBonus()));
         }
 
         public float GetFinalHpRegen()
         {
-            return hpRegenBonus * (1 + GetTotalGradeBonus());
+            return hpRegenBonus * (1 + GetTotalBonus());
         }
 
-        // 등급 표시용 문자열
+        // 전체 정보 표시용 문자열
         public string GetFullRarityName()
         {
-            return $"{RarityColors.GetRarityName(rarity)} {subGrade}성";
+            return $"{RarityColors.GetRarityName(rarity)} {subGrade}성 Lv.{level}";
         }
 
         // Odin Inspector 헬퍼
-        private string GetGradeInfo()
+        private string GetFullInfo()
         {
-            return $"{GetFullRarityName()} - 총 보너스: +{GetTotalGradeBonus() * 100f:F1}% (기본 {GetRarityBonus() * 100f:F0}% + 세부 {GetSubGradeBonus() * 100f:F1}%)";
+            return $"{GetFullRarityName()} - 총 보너스: +{GetTotalBonus() * 100f:F1}% " +
+                   $"(등급 {GetRarityBonus() * 100f:F0}% + 세부 {GetSubGradeBonus() * 100f:F1}% + 레벨 {GetLevelBonus() * 100f:F0}%)";
+        }
+
+        private Color GetProgressBarColor(float value)
+        {
+            if (value >= 200) return new Color(1f, 0.84f, 0f); // 금색
+            if (value >= 150) return new Color(1f, 0.5f, 0f);  // 주황색
+            if (value >= 100) return new Color(0.8f, 0.3f, 0.8f); // 보라색
+            if (value >= 50) return new Color(0.3f, 0.5f, 1f);   // 파란색
+            return new Color(0.5f, 0.8f, 0.5f); // 녹색
         }
 
         [Title("장비 미리보기")]
@@ -261,23 +294,23 @@ namespace RPG.Items.Equipment
         }
 
         [ButtonGroup("TestButtons")]
-        [Button("세부 등급 업그레이드", ButtonSizes.Medium)]
+        [Button("레벨업 (+10)", ButtonSizes.Medium)]
         [GUIColor(0.8f, 0.8f, 0.3f)]
-        [EnableIf("@subGrade < 5")]
-        private void UpgradeSubGrade()
+        [EnableIf("@level < 100")]
+        private void LevelUp()
         {
-            subGrade++;
-            Debug.Log($"{equipmentName}이(가) {GetFullRarityName()}로 업그레이드되었습니다!");
+            level = Mathf.Min(level + 10, 100);
+            Debug.Log($"{equipmentName}이(가) Lv.{level}로 레벨업했습니다!");
         }
 
         [ButtonGroup("TestButtons")]
-        [Button("세부 등급 다운그레이드", ButtonSizes.Medium)]
+        [Button("레벨 초기화", ButtonSizes.Medium)]
         [GUIColor(0.8f, 0.3f, 0.3f)]
-        [EnableIf("@subGrade > 1")]
-        private void DowngradeSubGrade()
+        [EnableIf("@level > 1")]
+        private void ResetLevel()
         {
-            subGrade--;
-            Debug.Log($"{equipmentName}이(가) {GetFullRarityName()}로 다운그레이드되었습니다!");
+            level = 1;
+            Debug.Log($"{equipmentName}의 레벨이 초기화되었습니다!");
         }
     }
 }
